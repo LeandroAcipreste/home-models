@@ -1,0 +1,1321 @@
+<!DOCTYPE html>
+<html
+  class="w-mod-js w-mod-ix wf-inter-n8-active wf-tasaorbiter-n6-active w-mod-ix3"
+  lang="pt-BR"
+>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Design System 3 — LUMENS × Home Model × Ovo Lumen</title>
+    <meta
+      name="description"
+      content="Design system criativo combinando o template Ovo Lumen (Webflow), paleta editorial inspirada em Home Model 2025 e linguagem visual do site em branco."
+    />
+
+    <!-- Mesmos assets CSS do ovo-lumen/index.html -->
+    <link
+      href="ovo-lumen/assets/ovo-lumenis_b4947abd6c1e.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <link href="ovo-lumen/assets/css_47e4f391237d.css" media="all" rel="stylesheet" />
+
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect" />
+
+    <!-- Mesma estratégia de fontes do index.html ovo-lumen -->
+    <script src="ovo-lumen/assets/webfont_3a3adf980c7d.js" type="text/javascript"></script>
+    <script type="text/javascript">
+      WebFont.load({
+        google: {
+          families: [
+            "Inter:100,200,300,regular,500,600,700,800,900",
+            "TASA Orbiter:regular,500,600,700,800",
+          ],
+        },
+      });
+    </script>
+
+    <style>
+      /* Design System 3 — tokens e camadas sobre o tema branco (dist) + acentos editorial */
+      :root {
+        --hm-paper: #ffffff;
+        --hm-ink: #0a0a0a;
+        --hm-ink-soft: #404040;
+        --hm-champagne: #c9a961;
+        --hm-rose: #d4a5a5;
+        --hm-burgundy: #8b2942;
+        --hm-slate: #64748b;
+        --hm-line: rgba(10, 10, 10, 0.08);
+        --hm-glow-warm: rgba(201, 169, 97, 0.45);
+        --hm-glow-rose: rgba(212, 165, 165, 0.4);
+        --hm-mesh-1: radial-gradient(
+          ellipse 80% 60% at 20% 30%,
+          rgba(201, 169, 97, 0.15),
+          transparent 55%
+        );
+        --hm-mesh-2: radial-gradient(
+          ellipse 70% 50% at 80% 70%,
+          rgba(139, 41, 66, 0.12),
+          transparent 50%
+        );
+        --hm-mesh-3: radial-gradient(
+          circle at 50% 100%,
+          rgba(212, 165, 165, 0.18),
+          transparent 45%
+        );
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body.ds3 {
+        background: var(--hm-paper);
+        color: var(--hm-ink);
+      }
+
+      /* Hero DS3 — malha animada + brilho (inspirado em motion suave do build em branco) */
+      .ds3-hero-shell {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .ds3-hero-shell::before {
+        content: "";
+        position: absolute;
+        inset: -20%;
+        background: var(--hm-mesh-1), var(--hm-mesh-2), var(--hm-mesh-3);
+        animation: ds3-mesh-drift 18s ease-in-out infinite alternate;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .ds3-hero-shell::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(
+          circle at 50% 40%,
+          transparent 30%,
+          rgba(255, 255, 255, 0.85) 75%
+        );
+        pointer-events: none;
+        z-index: 1;
+      }
+
+      @keyframes ds3-mesh-drift {
+        0% {
+          transform: translate3d(0, 0, 0) scale(1);
+        }
+        100% {
+          transform: translate3d(-3%, 2%, 0) scale(1.05);
+        }
+      }
+
+      .ds3-hero-inner {
+        position: relative;
+        z-index: 2;
+      }
+
+      /* LUMENS — jogo de cores tipo logomarca (gradiente por letra) */
+      .hm-lumens {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.02em;
+        line-height: 0.95;
+      }
+
+      .hm-lumens .lumens-char {
+        display: inline-block;
+        font-family: "TASA Orbiter", "Inter", sans-serif;
+        font-weight: 700;
+        letter-spacing: -0.04em;
+        background: linear-gradient(
+          125deg,
+          var(--lc-a, #e63946) 0%,
+          var(--lc-b, #f4a261) 50%,
+          var(--lc-c, #9b5de5) 100%
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        -webkit-text-fill-color: transparent;
+        filter: drop-shadow(0 0 28px var(--hm-glow-warm));
+        text-shadow: none;
+      }
+
+      .hm-lumens .lumens-char:nth-child(1) {
+        --lc-a: #e63946;
+        --lc-b: #ff6b6b;
+        --lc-c: #f4a261;
+      }
+      .hm-lumens .lumens-char:nth-child(2) {
+        --lc-a: #f4a261;
+        --lc-b: #e9c46a;
+        --lc-c: #2a9d8f;
+      }
+      .hm-lumens .lumens-char:nth-child(3) {
+        --lc-a: #9b5de5;
+        --lc-b: #7209b7;
+        --lc-c: #4361ee;
+      }
+      .hm-lumens .lumens-char:nth-child(4) {
+        --lc-a: #4361ee;
+        --lc-b: #4cc9f0;
+        --lc-c: #00f5d4;
+      }
+      .hm-lumens .lumens-char:nth-child(5) {
+        --lc-a: #ff006e;
+        --lc-b: #fb5607;
+        --lc-c: #ffbe0b;
+      }
+      .hm-lumens .lumens-char:nth-child(6) {
+        --lc-a: #8b2942;
+        --lc-b: #d4a5a5;
+        --lc-c: #c9a961;
+      }
+
+      /* Botões — micro-interações extras (mantém classes .button do template) */
+      .ds3 .button {
+        position: relative;
+        overflow: hidden;
+        transition:
+          box-shadow 0.35s ease,
+          transform 0.35s ease;
+      }
+
+      .ds3 .button::after {
+        content: "";
+        position: absolute;
+        inset: -40%;
+        background: linear-gradient(
+          120deg,
+          transparent 40%,
+          rgba(255, 255, 255, 0.35) 50%,
+          transparent 60%
+        );
+        transform: translateX(-120%) rotate(12deg);
+        transition: transform 0.65s ease;
+        pointer-events: none;
+      }
+
+      .ds3 .button:hover::after {
+        transform: translateX(120%) rotate(12deg);
+      }
+
+      .ds3 .button:hover {
+        box-shadow:
+          0 12px 40px rgba(10, 10, 10, 0.12),
+          0 0 0 1px rgba(201, 169, 97, 0.25);
+      }
+
+      .ds3 .button.secondary:hover {
+        box-shadow:
+          0 12px 36px rgba(139, 41, 66, 0.15),
+          0 0 0 1px rgba(212, 165, 165, 0.35);
+      }
+
+      /* Cards DS3 */
+      .ds3-card {
+        border-radius: 16px;
+        border: 1px solid var(--hm-line);
+        background: #fff;
+        padding: 1.75rem;
+        box-shadow: 0 24px 60px rgba(10, 10, 10, 0.06);
+        transition:
+          transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+          box-shadow 0.45s ease;
+      }
+
+      .ds3-card:hover {
+        transform: translateY(-6px);
+        box-shadow:
+          0 32px 80px rgba(10, 10, 10, 0.1),
+          0 0 0 1px rgba(201, 169, 97, 0.2);
+      }
+
+      /* Badges */
+      .ds3-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.35rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        border: 1px solid var(--hm-line);
+        background: rgba(255, 255, 255, 0.9);
+      }
+
+      .ds3-badge--accent {
+        border-color: rgba(201, 169, 97, 0.45);
+        color: var(--hm-burgundy);
+        box-shadow: 0 0 24px var(--hm-glow-warm);
+      }
+
+      /* Modal */
+      .ds3-modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(10, 10, 10, 0.45);
+        backdrop-filter: blur(8px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        padding: 1.5rem;
+      }
+
+      .ds3-modal-backdrop[open],
+      .ds3-modal-backdrop.is-open {
+        display: flex;
+      }
+
+      .ds3-modal {
+        max-width: 520px;
+        width: 100%;
+        border-radius: 20px;
+        background: #fff;
+        padding: 2rem;
+        border: 1px solid var(--hm-line);
+        box-shadow: 0 40px 100px rgba(10, 10, 10, 0.18);
+        animation: ds3-modal-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+      }
+
+      @keyframes ds3-modal-in {
+        from {
+          opacity: 0;
+          transform: translateY(16px) scale(0.98);
+          filter: blur(6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+          filter: blur(0);
+        }
+      }
+
+      /* Tooltip */
+      .ds3-tip-wrap {
+        position: relative;
+        display: inline-block;
+      }
+
+      .ds3-tip {
+        position: absolute;
+        left: 50%;
+        bottom: calc(100% + 10px);
+        transform: translateX(-50%) translateY(6px);
+        padding: 0.5rem 0.75rem;
+        font-size: 0.75rem;
+        white-space: nowrap;
+        background: var(--hm-ink);
+        color: #fff;
+        border-radius: 8px;
+        opacity: 0;
+        pointer-events: none;
+        transition:
+          opacity 0.25s ease,
+          transform 0.25s ease;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+      }
+
+      .ds3-tip-wrap:hover .ds3-tip,
+      .ds3-tip-wrap:focus-within .ds3-tip {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+
+      /* Tabelas de documentação */
+      .ds3-doc-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.875rem;
+      }
+
+      .ds3-doc-table th,
+      .ds3-doc-table td {
+        border: 1px solid var(--hm-line);
+        padding: 0.65rem 0.75rem;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      .ds3-doc-table th {
+        background: rgba(10, 10, 10, 0.03);
+        font-weight: 600;
+      }
+
+      .ds3-swatch {
+        height: 3rem;
+        border-radius: 10px;
+        border: 1px solid var(--hm-line);
+      }
+
+      .ds3-section-bg {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .ds3-section-bg::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+            135deg,
+            rgba(201, 169, 97, 0.06),
+            transparent 40%
+          ),
+          linear-gradient(225deg, rgba(139, 41, 66, 0.05), transparent 45%);
+        animation: ds3-bg-pulse 14s ease-in-out infinite alternate;
+        pointer-events: none;
+      }
+
+      @keyframes ds3-bg-pulse {
+        0% {
+          opacity: 0.7;
+          transform: scale(1);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1.02);
+        }
+      }
+
+      .ds3-section-inner {
+        position: relative;
+        z-index: 1;
+      }
+
+      code.ds3-code {
+        font-family:
+          ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 0.8em;
+        background: rgba(10, 10, 10, 0.05);
+        padding: 0.15rem 0.4rem;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+
+  <body class="ds3" style="scroll-behavior: smooth">
+    <!-- Navbar — mesmas classes w-nav / container do ovo-lumen -->
+    <div class="fixed">
+      <div
+        class="navbar w-nav"
+        data-animation="default"
+        data-collapse="medium"
+        data-duration="400"
+        role="banner"
+        style="background-color: rgb(255, 255, 255)"
+      >
+        <div class="container navbar-container">
+          <div class="navbar-holder">
+            <div class="navbar-container">
+              <a class="brand w-nav-brand w--current" href="#top" aria-label="Home">
+                <span class="hm-lumens" style="font-size: 1.25rem" aria-hidden="true">
+                  <span class="lumens-char">L</span>
+                  <span class="lumens-char">U</span>
+                  <span class="lumens-char">M</span>
+                  <span class="lumens-char">E</span>
+                  <span class="lumens-char">N</span>
+                  <span class="lumens-char">S</span>
+                </span>
+              </a>
+              <nav class="nav-menu w-nav-menu" role="navigation">
+                <div class="nav-menu-link-holder">
+                  <div class="nav-menu-link-container">
+                    <div class="nav-links">
+                      <div class="nav-link-wrapper">
+                        <a class="nav-link w-nav-link w--current" href="#hero-ds3">Hero</a>
+                        <div class="nav-line"></div>
+                      </div>
+                      <div class="nav-link-wrapper">
+                        <a class="nav-link w-nav-link" href="#tipo">Tipografia</a>
+                        <div class="nav-line"></div>
+                      </div>
+                      <div class="nav-link-wrapper">
+                        <a class="nav-link w-nav-link" href="#cores">Cores</a>
+                        <div class="nav-line"></div>
+                      </div>
+                      <div class="nav-link-wrapper">
+                        <a class="nav-link w-nav-link" href="#ui">Componentes</a>
+                        <div class="nav-line"></div>
+                      </div>
+                      <div class="nav-link-wrapper">
+                        <a class="nav-link w-nav-link" href="#anim">Animações</a>
+                        <div class="nav-line"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </nav>
+              <div
+                class="menu-button w-nav-button"
+                role="button"
+                tabindex="0"
+                aria-label="menu"
+              >
+                <div class="icon w-icon-nav-menu"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HERO — demonstração (estrutura image_wrap / content_img-wrap / hero-container do index ovo-lumen) -->
+    <div class="hero ds3-hero-shell" id="top">
+      <div class="image_wrap" style="overflow: visible; position: relative">
+        <!-- Subconjunto das imagens hero do template (mesmos arquivos / classes) -->
+        <div class="content_img-wrap" style="will-change: transform, opacity; position: absolute">
+          <img
+            alt=""
+            class="content_img"
+            loading="eager"
+            src="ovo-lumen/assets/68e3d77f10f567de913a9faf_Hero__37d190771a14.jpg"
+            srcset="
+              ovo-lumen/assets/68e3d77f10f567de913a9faf_Hero__d5307c5f3ad1.jpg 500w,
+              ovo-lumen/assets/68e3d77f10f567de913a9faf_Hero__29b33d80a6e6.jpg 800w,
+              ovo-lumen/assets/68e3d77f10f567de913a9faf_Hero__37d190771a14.jpg 868w
+            "
+            sizes="(max-width: 868px) 100vw, 868px"
+          />
+        </div>
+        <div class="content_img-wrap" style="will-change: transform, opacity; position: absolute">
+          <img
+            alt=""
+            class="content_img"
+            loading="lazy"
+            src="ovo-lumen/assets/68e3d77fd0c0fc3b5d50f337_Hero__8c2aa91b8e7d.jpg"
+            srcset="
+              ovo-lumen/assets/68e3d77fd0c0fc3b5d50f337_Hero__a238c1a1ac03.jpg 500w,
+              ovo-lumen/assets/68e3d77fd0c0fc3b5d50f337_Hero__6b1656ed907d.jpg 800w,
+              ovo-lumen/assets/68e3d77fd0c0fc3b5d50f337_Hero__8c2aa91b8e7d.jpg 868w
+            "
+            sizes="(max-width: 868px) 100vw, 868px"
+          />
+        </div>
+        <div class="content_img-wrap" style="will-change: transform, opacity; position: absolute">
+          <img
+            alt=""
+            class="content_img"
+            loading="lazy"
+            src="ovo-lumen/assets/68e3d7809a0a13818f2450c6_Hero__c0997dff61d9.jpg"
+            srcset="
+              ovo-lumen/assets/68e3d7809a0a13818f2450c6_Hero__dc73fdf09895.jpg 500w,
+              ovo-lumen/assets/68e3d7809a0a13818f2450c6_Hero__258210d268d9.jpg 800w,
+              ovo-lumen/assets/68e3d7809a0a13818f2450c6_Hero__c0997dff61d9.jpg 868w
+            "
+            sizes="(max-width: 868px) 100vw, 868px"
+          />
+        </div>
+        <div class="content_img-wrap" style="will-change: transform, opacity; position: absolute">
+          <img
+            alt=""
+            class="content_img"
+            loading="lazy"
+            src="ovo-lumen/assets/68e3d7b5c4a6d52c32790209_Hero__427e482ff40b.jpg"
+            srcset="
+              ovo-lumen/assets/68e3d7b5c4a6d52c32790209_Hero__1a92bf2723c3.jpg 500w,
+              ovo-lumen/assets/68e3d7b5c4a6d52c32790209_Hero__9eb08239e821.jpg 800w,
+              ovo-lumen/assets/68e3d7b5c4a6d52c32790209_Hero__427e482ff40b.jpg 868w
+            "
+            sizes="(max-width: 868px) 100vw, 868px"
+          />
+        </div>
+        <div class="content_img-wrap" style="will-change: transform, opacity; position: absolute">
+          <img
+            alt=""
+            class="content_img"
+            loading="lazy"
+            src="ovo-lumen/assets/68e3d7b50d538baf77665213_Hero__3270da6dfbd3.jpg"
+            srcset="
+              ovo-lumen/assets/68e3d7b50d538baf77665213_Hero__a51c0303a7a5.jpg 500w,
+              ovo-lumen/assets/68e3d7b50d538baf77665213_Hero__af8e54aa700d.jpg 800w,
+              ovo-lumen/assets/68e3d7b50d538baf77665213_Hero__3270da6dfbd3.jpg 868w
+            "
+            sizes="(max-width: 868px) 100vw, 868px"
+          />
+        </div>
+        <div class="content_img-wrap" style="will-change: transform, opacity; position: absolute">
+          <img
+            alt=""
+            class="content_img"
+            loading="lazy"
+            src="ovo-lumen/assets/68e3d7b5119424f8b203d6dc_Hero__5e4b43fa083e.jpg"
+            srcset="
+              ovo-lumen/assets/68e3d7b5119424f8b203d6dc_Hero__989f848f3a5c.jpg 500w,
+              ovo-lumen/assets/68e3d7b5119424f8b203d6dc_Hero__33d5125a57d4.jpg 800w,
+              ovo-lumen/assets/68e3d7b5119424f8b203d6dc_Hero__5e4b43fa083e.jpg 868w
+            "
+            sizes="(max-width: 868px) 100vw, 868px"
+          />
+        </div>
+      </div>
+
+      <div class="container hero-container ds3-hero-inner" id="hero-ds3">
+        <div class="hero-text-wrapper">
+          <div class="logo-holder">
+            <div class="logo-hero-text" aria-label="LUMENS">
+              <div class="hm-lumens" style="font-size: clamp(3rem, 12vw, 7rem)">
+                <span class="lumens-char">L</span>
+                <span class="lumens-char">U</span>
+                <span class="lumens-char">M</span>
+                <span class="lumens-char">E</span>
+                <span class="lumens-char">N</span>
+                <span class="lumens-char">S</span>
+              </div>
+            </div>
+
+            <div class="hero-links-holder">
+              <div class="hero-content">
+                <div class="hero-content-holder">
+                  <div class="animate-on-load _2 fade-in-on-scroll">
+                    <div class="small-text">Design System 3</div>
+                  </div>
+                  <div class="animate-on-load fade-in-on-scroll">
+                    <div class="small-text">Ovo Lumen × Home Model</div>
+                  </div>
+                  <div class="animate-on-load fade-in-on-scroll">
+                    <div class="small-text">Superfície branca</div>
+                  </div>
+                  <div class="animate-on-load fade-in-on-scroll">
+                    <div class="small-text">Motion + GSAP</div>
+                  </div>
+                </div>
+                <div class="hero-content-holder">
+                  <div class="animate-on-load fade-in-on-scroll">
+                    <div class="small-text">Base</div>
+                  </div>
+                  <div class="animate-on-load fade-in-on-scroll">
+                    <div class="small-text">classes Webflow</div>
+                  </div>
+                  <div class="animate-on-load fade-in-on-scroll">
+                    <div class="small-text">.button · .hero · .fade-in-on-scroll</div>
+                  </div>
+                  <div class="animate-on-load fade-in-on-scroll">
+                    <div class="small-text">Documentação viva</div>
+                  </div>
+                </div>
+              </div>
+              <div class="hero-content no-gird">
+                <div class="hero-content-holder right">
+                  <div class="animate-on-load fade-in-on-scroll">
+                    <a class="small-link w-inline-block" href="#ui"
+                      ><div class="small-text">componentes ↗</div></a
+                    >
+                  </div>
+                  <div class="animate-on-load fade-in-on-scroll">
+                    <a class="small-link w-inline-block" href="#anim"
+                      ><div class="small-text">animações ↗</div></a
+                    >
+                  </div>
+                  <div class="animate-on-load fade-in-on-scroll">
+                    <a class="small-link w-inline-block" href="#cores"
+                      ><div class="small-text">paleta ↗</div></a
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+          <div class="hero-paragraph-holder grid">
+            <div class="hero-holder">
+              <div class="animate-on-load fade-in-on-scroll">
+                <h5 class="no-margins h4-style">
+                  Primeira dobra como vitrine: trilha de imagens GSAP (Observer), tipografia Inter +
+                  TASA Orbiter, botões com brilho e malha editorial animada.
+                </h5>
+              </div>
+            </div>
+            <div class="hero-paragraph-container">
+              <div class="animate-on-load fade-in-on-scroll">
+                <p>
+                  Paleta inspirada no clima editorial do PDF <strong>Home Model 2025</strong> (papel
+                  branco, preto profundo, ouro champagne e acentos rosé/bordô). Mesmos ficheiros CSS/JS
+                  do <code class="ds3-code">ovo-lumen/index.html</code>.
+                </p>
+              </div>
+              <div class="hero-button-holder">
+                <div class="animate-on-load fade-in-on-scroll">
+                  <a class="button w-inline-block" href="#tipo">
+                    <div class="button-text-holder">
+                      <div class="button-text">Explorar tipografia</div>
+                      <div class="button-text">Explorar tipografia</div>
+                    </div>
+                    <img
+                      alt=""
+                      class="button-icon"
+                      loading="lazy"
+                      src="ovo-lumen/assets/68efdffd38ba8733724a9c60_Arrow_02a44309d8ca.svg"
+                    />
+                  </a>
+                </div>
+                <div class="animate-on-load fade-in-on-scroll">
+                  <a class="button secondary w-inline-block" href="#" id="open-modal-demo">
+                    <div class="button-text-holder">
+                      <div class="button-text">Modal demo</div>
+                      <div class="button-text">Modal demo</div>
+                    </div>
+                    <div class="red-circle black"></div>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tipografia -->
+    <div class="section ds3-section-bg" id="tipo">
+      <div class="section-spacing">
+        <div class="line"></div>
+        <div class="container no-padding-bot">
+          <div class="section-inside ds3-section-inner">
+            <div class="grid-title">
+              <div class="grid-title-container">
+                <div class="fade-in-on-scroll">
+                  <div class="paragraph-title">Tipografia</div>
+                </div>
+                <div class="title-animation">
+                  <div class="fade-in-on-scroll">
+                    <h1 class="h4-style">Escala tipográfica e papéis de texto</h1>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <p class="fade-in-on-scroll" style="max-width: 52rem; margin-bottom: 2rem">
+              <strong>Primary:</strong> Inter (Google Fonts) — UI, corpo e labels.
+              <strong>Display:</strong> TASA Orbiter — títulos hero e marca.
+              <strong>Monospace:</strong> stack do sistema para código.
+              <strong>Carregamento:</strong> <code class="ds3-code">WebFont.load</code> via
+              <code class="ds3-code">webfont_3a3adf980c7d.js</code> (mesmo fluxo do template).
+            </p>
+
+            <div class="fade-in-on-scroll" style="margin-bottom: 1.5rem">
+              <h1>h1 — Display editorial</h1>
+              <h2>h2 — Seção principal</h2>
+              <h3>h3 — Subseção</h3>
+              <h4>h4 — h4-style disponível no template</h4>
+              <h5>h5 — Destaques curtos</h5>
+              <h6>h6 — Metadados</h6>
+              <p class="body-lg" style="font-size: 1.125rem; line-height: 1.65">
+                body-lg — parágrafo confortável para leitura longa em colunas largas.
+              </p>
+              <p>body — texto padrão para conteúdo e documentação.</p>
+              <p style="font-size: 0.875rem; line-height: 1.55; color: var(--hm-ink-soft)">
+                body-sm — notas secundárias, legendas e especificações técnicas.
+              </p>
+              <div class="paragraph-title" style="margin-top: 1rem">Caption / label (paragraph-title)</div>
+              <div class="small-text">Helper — classe .small-text (uppercase editorial)</div>
+            </div>
+
+            <div style="overflow-x: auto">
+              <table class="ds3-doc-table fade-in-on-scroll">
+                <thead>
+                  <tr>
+                    <th>Papel</th>
+                    <th>font-family</th>
+                    <th>weight</th>
+                    <th>size / line-height</th>
+                    <th>letter-spacing</th>
+                    <th>transform</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Display / marca</td>
+                    <td>TASA Orbiter, Inter, sans-serif</td>
+                    <td>700</td>
+                    <td>clamp 3rem–7rem / 0.95</td>
+                    <td>-0.04em</td>
+                    <td>none</td>
+                  </tr>
+                  <tr>
+                    <td>h1–h2</td>
+                    <td>Inter, system-ui, sans-serif</td>
+                    <td>600–700</td>
+                    <td>herdado do CSS Webflow</td>
+                    <td>-0.02em</td>
+                    <td>none</td>
+                  </tr>
+                  <tr>
+                    <td>body-lg</td>
+                    <td>Inter</td>
+                    <td>400</td>
+                    <td>18px / 1.65</td>
+                    <td>0</td>
+                    <td>none</td>
+                  </tr>
+                  <tr>
+                    <td>body</td>
+                    <td>Inter</td>
+                    <td>400</td>
+                    <td>16px / 1.6</td>
+                    <td>0</td>
+                    <td>none</td>
+                  </tr>
+                  <tr>
+                    <td>body-sm / helper</td>
+                    <td>Inter</td>
+                    <td>400–500</td>
+                    <td>14px / 1.55</td>
+                    <td>0.01em</td>
+                    <td>none</td>
+                  </tr>
+                  <tr>
+                    <td>label / eyebrow (.paragraph-title)</td>
+                    <td>Inter</td>
+                    <td>600</td>
+                    <td>~12px / 1.2</td>
+                    <td>0.12em</td>
+                    <td>uppercase</td>
+                  </tr>
+                  <tr>
+                    <td>code</td>
+                    <td>ui-monospace, Menlo, monospace</td>
+                    <td>400</td>
+                    <td>0.8em relativo</td>
+                    <td>0</td>
+                    <td>none</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cores -->
+    <div class="section" id="cores">
+      <div class="section-spacing">
+        <div class="container gray">
+          <div class="section-inside ds3-section-bg">
+            <div class="ds3-section-inner">
+              <div class="grid-title">
+                <div class="grid-title-container">
+                  <div class="fade-in-on-scroll">
+                    <div class="paragraph-title">Sistema de cores</div>
+                  </div>
+                  <div class="title-animation">
+                    <div class="fade-in-on-scroll">
+                      <h1 class="h4-style">Tokens semânticos + variantes de opacidade</h1>
+                    </div>
+                  </div>
+                </div>
+                <div class="fade-in-on-scroll">
+                  <p>
+                    Base <strong>branca</strong> (site) com tintas profundas e acentos quentes/rosé —
+                    alinhado ao moodboard editorial do PDF de referência. Contraste de texto principal
+                    projetado para <strong>AA</strong> em corpo; títulos grandes mantêm peso visual AAA
+                    em relação ao fundo branco.
+                  </p>
+                </div>
+              </div>
+
+              <table class="ds3-doc-table fade-in-on-scroll" style="margin-top: 2rem">
+                <thead>
+                  <tr>
+                    <th>Role</th>
+                    <th>Hex</th>
+                    <th>RGB</th>
+                    <th>HSL</th>
+                    <th>Uso</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>primary / texto</td>
+                    <td>#0a0a0a</td>
+                    <td>10,10,10</td>
+                    <td>0° 0% 4%</td>
+                    <td>Texto principal, ícones fortes</td>
+                  </tr>
+                  <tr>
+                    <td>secondary / texto suave</td>
+                    <td>#404040</td>
+                    <td>64,64,64</td>
+                    <td>0° 0% 25%</td>
+                    <td>Subtítulos, secondary text</td>
+                  </tr>
+                  <tr>
+                    <td>background</td>
+                    <td>#ffffff</td>
+                    <td>255,255,255</td>
+                    <td>0° 0% 100%</td>
+                    <td>Superfície principal (dist)</td>
+                  </tr>
+                  <tr>
+                    <td>accent warm</td>
+                    <td>#c9a961</td>
+                    <td>201,169,97</td>
+                    <td>43° 49% 58%</td>
+                    <td>Destaques, glow, bordas hover</td>
+                  </tr>
+                  <tr>
+                    <td>accent rose</td>
+                    <td>#d4a5a5</td>
+                    <td>212,165,165</td>
+                    <td>0° 35% 74%</td>
+                    <td>Decorativo, gradientes suaves</td>
+                  </tr>
+                  <tr>
+                    <td>accent burgundy</td>
+                    <td>#8b2942</td>
+                    <td>139,41,66</td>
+                    <td>343° 54% 35%</td>
+                    <td>CTA secundário, badges</td>
+                  </tr>
+                  <tr>
+                    <td>feedback neutral</td>
+                    <td>#64748b</td>
+                    <td>100,116,139</td>
+                    <td>215° 16% 47%</td>
+                    <td>Bordas, ícones desativados</td>
+                  </tr>
+                  <tr>
+                    <td>border / hairline</td>
+                    <td>rgba(10,10,10,0.08)</td>
+                    <td>—</td>
+                    <td>—</td>
+                    <td>Linhas, cards</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div
+                class="fade-in-on-scroll"
+                style="
+                  display: grid;
+                  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                  gap: 1rem;
+                  margin-top: 2rem;
+                "
+              >
+                <div>
+                  <div class="ds3-swatch" style="background: #0a0a0a"></div>
+                  <div class="paragraph-title" style="margin-top: 0.5rem">ink</div>
+                </div>
+                <div>
+                  <div class="ds3-swatch" style="background: #c9a961"></div>
+                  <div class="paragraph-title" style="margin-top: 0.5rem">champagne</div>
+                </div>
+                <div>
+                  <div class="ds3-swatch" style="background: #d4a5a5"></div>
+                  <div class="paragraph-title" style="margin-top: 0.5rem">rose</div>
+                </div>
+                <div>
+                  <div class="ds3-swatch" style="background: #8b2942"></div>
+                  <div class="paragraph-title" style="margin-top: 0.5rem">burgundy</div>
+                </div>
+                <div>
+                  <div
+                    class="ds3-swatch"
+                    style="background: linear-gradient(135deg, #c9a961, #8b2942, #4361ee)"
+                  ></div>
+                  <div class="paragraph-title" style="margin-top: 0.5rem">gradient hero</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- UI Components -->
+    <div class="section ds3-section-bg" id="ui">
+      <div class="section-spacing">
+        <div class="container">
+          <div class="section-inside ds3-section-inner">
+            <div class="grid-title">
+              <div class="grid-title-container">
+                <div class="fade-in-on-scroll">
+                  <div class="paragraph-title">UI Kit</div>
+                </div>
+                <div class="title-animation">
+                  <div class="fade-in-on-scroll">
+                    <h1 class="h4-style">Componentes com animação (classes do template)</h1>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="fade-in-on-scroll"
+              style="
+                display: grid;
+                gap: 2rem;
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                margin-top: 2rem;
+              "
+            >
+              <div class="ds3-card">
+                <div class="paragraph-title">Buttons</div>
+                <p style="font-size: 0.875rem; color: var(--hm-ink-soft); margin-bottom: 1rem">
+                  Especificação: <code class="ds3-code">.button</code> primário com
+                  <code class="ds3-code">.button-text-holder</code> duplicado (hover do template),
+                  <code class="ds3-code">.button.secondary</code> + <code class="ds3-code">.red-circle</code>.
+                  Shine CSS extra na classe <code class="ds3-code">.ds3</code>.
+                </p>
+                <div style="display: flex; flex-wrap: wrap; gap: 0.75rem">
+                  <a class="button w-inline-block" href="#">
+                    <div class="button-text-holder">
+                      <div class="button-text">Primário</div>
+                      <div class="button-text">Primário</div>
+                    </div>
+                    <img
+                      alt=""
+                      class="button-icon"
+                      src="ovo-lumen/assets/68efdffd38ba8733724a9c60_Arrow_02a44309d8ca.svg"
+                    />
+                  </a>
+                  <a class="button secondary w-inline-block" href="#">
+                    <div class="button-text-holder">
+                      <div class="button-text">Secundário</div>
+                      <div class="button-text">Secundário</div>
+                    </div>
+                    <div class="red-circle black"></div>
+                  </a>
+                </div>
+              </div>
+
+              <div class="ds3-card">
+                <div class="paragraph-title">Inputs</div>
+                <p style="font-size: 0.875rem; color: var(--hm-ink-soft); margin-bottom: 1rem">
+                  <code class="ds3-code">.text-field</code> +
+                  <code class="ds3-code">.grey</code> como no footer do template.
+                </p>
+                <input
+                  class="text-field grey w-input"
+                  type="email"
+                  placeholder="nome@home.model"
+                  style="width: 100%"
+                />
+              </div>
+
+              <div class="ds3-card">
+                <div class="paragraph-title">Badges</div>
+                <span class="ds3-badge">Neutral</span>
+                <span class="ds3-badge ds3-badge--accent" style="margin-left: 0.5rem">Accent</span>
+                <p style="font-size: 0.8rem; margin-top: 1rem; color: var(--hm-ink-soft)">
+                  Tooltip: hover no ícone
+                  <span class="ds3-tip-wrap" tabindex="0">
+                    <span style="cursor: help; text-decoration: underline dotted">ⓘ</span>
+                    <span class="ds3-tip">Token semântico: accent / warm glow</span>
+                  </span>
+                </p>
+              </div>
+            </div>
+
+            <div class="fade-in-on-scroll" style="margin-top: 2rem">
+              <div class="paragraph-title">Navbar</div>
+              <p>
+                Barra fixa usa <code class="ds3-code">.navbar</code>,
+                <code class="ds3-code">.w-nav</code>, <code class="ds3-code">.nav-link</code>,
+                <code class="ds3-code">.nav-line</code> — mesma marcação do
+                <code class="ds3-code">ovo-lumen/index.html</code>.
+              </p>
+            </div>
+
+            <div class="fade-in-on-scroll" style="margin-top: 2rem">
+              <div class="paragraph-title">Modal</div>
+              <p>
+                Overlay custom <code class="ds3-code">.ds3-modal-backdrop</code> + painel branco. Abrir
+                pelo botão hero “Modal demo”.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ícones -->
+    <div class="section">
+      <div class="section-spacing">
+        <div class="container">
+          <div class="section-inside">
+            <div class="grid-title">
+              <div class="grid-title-container">
+                <div class="fade-in-on-scroll">
+                  <div class="paragraph-title">Ícones</div>
+                </div>
+                <div class="title-animation">
+                  <div class="fade-in-on-scroll">
+                    <h1 class="h4-style">SVGs do pacote ovo-lumen/assets</h1>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="fade-in-on-scroll"
+              style="display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: center; margin-top: 1rem"
+            >
+              <img src="ovo-lumen/assets/68efdffd38ba8733724a9c60_Arrow_02a44309d8ca.svg" alt="" width="40" />
+              <img src="ovo-lumen/assets/68e3cc611e8dc04727015112_Insta_f5203331292c.svg" alt="" width="36" />
+              <img src="ovo-lumen/assets/68e3cc611e8dc04727015229_Twitt_30854c34e352.svg" alt="" width="36" />
+              <img src="ovo-lumen/assets/68e3cc611e8dc04727015179_Mail__87664cd8b289.svg" alt="" width="36" />
+              <img src="ovo-lumen/assets/68e3cc611e8dc047270153f0_Logo__5ab8ca6e136c.svg" alt="" width="80" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Animações -->
+    <div class="section ds3-section-bg" id="anim">
+      <div class="section-spacing">
+        <div class="container">
+          <div class="section-inside ds3-section-inner">
+            <div class="grid-title">
+              <div class="grid-title-container">
+                <div class="fade-in-on-scroll">
+                  <div class="paragraph-title">Animações</div>
+                </div>
+                <div class="title-animation">
+                  <div class="fade-in-on-scroll">
+                    <h1 class="h4-style">GSAP + ScrollTrigger + Observer (mesmos ficheiros)</h1>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <ul class="fade-in-on-scroll" style="line-height: 1.8; max-width: 48rem">
+              <li>
+                <strong>Hero trail:</strong> script inline do
+                <code class="ds3-code">index.html</code> ovo-lumen (GSAP Observer) — classes
+                <code class="ds3-code">.hero</code>, <code class="ds3-code">.image_wrap</code>,
+                <code class="ds3-code">.content_img-wrap</code>.
+              </li>
+              <li>
+                <strong>Scroll reveal:</strong> elementos com
+                <code class="ds3-code">.fade-in-on-scroll</code> animados via ScrollTrigger no bloco
+                final desta página.
+              </li>
+              <li>
+                <strong>Backgrounds:</strong> malhas CSS (<code class="ds3-code">.ds3-hero-shell</code>,
+                <code class="ds3-code">.ds3-section-bg</code>) com keyframes lentos — reutilizados em
+                várias dobras.
+              </li>
+              <li>
+                <strong>Botões:</strong> hover com shine e sombra quente (camada
+                <code class="ds3-code">.ds3 .button</code>).
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Parceiros — reusa .partner -->
+    <div class="section">
+      <div class="section-spacing">
+        <div class="line"></div>
+        <div class="container no-padding-bot">
+          <div class="section-inside">
+            <div class="paragraph-title fade-in-on-scroll">Parceiros (classe .partner)</div>
+            <div class="partner-grid" style="margin-top: 1.5rem">
+              <div class="partner fade-in-on-scroll">
+                <img alt="" class="partner-logo" src="ovo-lumen/assets/68e3cc611e8dc047270153f0_Logo__5ab8ca6e136c.svg" />
+              </div>
+              <div class="content"></div>
+              <div class="partner fade-in-on-scroll">
+                <img alt="" class="partner-logo" src="ovo-lumen/assets/68e3cc611e8dc047270153f2_Logo__e9632d9580a6.svg" />
+              </div>
+              <div class="content"></div>
+              <div class="partner fade-in-on-scroll">
+                <img alt="" class="partner-logo" src="ovo-lumen/assets/68e3cc611e8dc047270153f4_Logo__8eb1d3e90840.svg" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="ds3-modal-backdrop" id="ds3-modal" role="dialog" aria-modal="true" aria-labelledby="ds3-modal-title">
+      <div class="ds3-modal">
+        <div class="paragraph-title" id="ds3-modal-title">Modal</div>
+        <p style="margin: 1rem 0">
+          Especificação: overlay com blur, cartão branco, animação de entrada
+          <code class="ds3-code">ds3-modal-in</code>. Fechar com botão ou clique fora.
+        </p>
+        <a class="button w-inline-block" href="#" id="close-modal-demo">
+          <div class="button-text-holder">
+            <div class="button-text">Fechar</div>
+            <div class="button-text">Fechar</div>
+          </div>
+          <img
+            alt=""
+            class="button-icon"
+            src="ovo-lumen/assets/68efdffd38ba8733724a9c60_Arrow_02a44309d8ca.svg"
+          />
+        </a>
+      </div>
+    </div>
+
+    <!-- Scripts — mesma ordem aproximada do ovo-lumen/index.html -->
+    <script src="ovo-lumen/assets/jquery-3_d5324b573f76.js"></script>
+    <script src="ovo-lumen/assets/webflow_df3965c6dd84.js"></script>
+    <script src="ovo-lumen/assets/webflow_4198e4cb59f8.js"></script>
+    <script src="ovo-lumen/assets/webflow_ef38f94d0ab3.js"></script>
+    <script src="ovo-lumen/assets/gsap_b1203ff1d74e.js"></script>
+    <script src="ovo-lumen/assets/SplitText_f70e7de38402.js"></script>
+    <script src="ovo-lumen/assets/ScrollTrigger_cc09781c55bb.js"></script>
+    <script src="ovo-lumen/assets/gsap_4f0dc5b47bd1.js"></script>
+    <script src="ovo-lumen/assets/Observer_2c190db100c2.js"></script>
+
+    <!-- Mouse trail hero — copiado do index ovo-lumen (GSAP Observer) -->
+    <script>
+      gsap.registerPlugin(Observer, ScrollTrigger);
+
+      (() => {
+        const D = 90,
+          IN = 0.2,
+          MOVE = 0.45,
+          OUT = 0.2,
+          SCALE = 0.6;
+
+        const waitForLoad = (cb) => {
+          const fn = () => {
+            if (document.readyState === "complete") {
+              gsap.ticker.remove(fn);
+              cb();
+            }
+          };
+          gsap.ticker.add(fn);
+        };
+
+        waitForLoad(() => {
+          const hero = document.querySelector(".hero");
+          const wrap = hero && hero.querySelector(".image_wrap");
+          const items = wrap ? gsap.utils.toArray(".content_img-wrap", wrap) : [];
+          if (!hero || !wrap || !items.length) return;
+
+          gsap.set(wrap, { position: "relative", overflow: "visible" });
+          gsap.set(items, { position: "absolute", willChange: "transform,opacity" });
+
+          let rect = wrap.getBoundingClientRect();
+          let over = false,
+            first = true,
+            i = -1,
+            z = 1;
+          let last = { x: 0, y: 0 },
+            curr = { x: 0, y: 0 };
+
+          const refreshRect = () => {
+            if (over) rect = wrap.getBoundingClientRect();
+          };
+          gsap.ticker.add(refreshRect);
+
+          const toLocal = (e) => ({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+
+          function spawn(fromX, fromY, toX, toY) {
+            i = (i + 1) % items.length;
+            const el = items[i];
+            const img = el.querySelector(".content_img") || el;
+
+            gsap.set(el, { left: 0, top: 0, zIndex: ++z });
+            gsap.set(img, { opacity: 1, scale: 1 });
+            gsap.killTweensOf([el, img]);
+
+            const w = el.offsetWidth || 160,
+              h = el.offsetHeight || 160;
+            const fx = fromX - w / 2,
+              fy = fromY - h / 2;
+            const tx = toX - w / 2,
+              ty = toY - h / 2;
+
+            const tl = gsap.timeline();
+            tl.fromTo(el, { opacity: 0, x: fx, y: fy }, { opacity: 1, duration: IN });
+            tl.to(el, { x: tx, y: ty, duration: MOVE }, "<");
+            tl.to(img, { opacity: 0, scale: SCALE, duration: OUT });
+          }
+
+          Observer.create({
+            target: hero,
+            type: "pointer,touch",
+            onHover: (self) => {
+              over = self.isActive();
+              first = over;
+              if (over && self.event) {
+                rect = wrap.getBoundingClientRect();
+                last = curr = toLocal(self.event);
+              }
+            },
+            onMove: (self) => {
+              if (!self.event) return;
+              curr = toLocal(self.event);
+
+              if (first) {
+                first = false;
+                spawn(curr.x, curr.y, curr.x, curr.y);
+                last = { ...curr };
+                return;
+              }
+
+              const dx = curr.x - last.x,
+                dy = curr.y - last.y;
+              if (dx * dx + dy * dy >= D * D) {
+                spawn(last.x, last.y, curr.x, curr.y);
+                last = { ...curr };
+              }
+            },
+          });
+        });
+      })();
+
+      /* Scroll reveal — .fade-in-on-scroll */
+      document.addEventListener("DOMContentLoaded", () => {
+        const els = gsap.utils.toArray(".fade-in-on-scroll");
+        els.forEach((el) => {
+          gsap.fromTo(
+            el,
+            { y: 48, opacity: 0, filter: "blur(8px)" },
+            {
+              y: 0,
+              opacity: 1,
+              filter: "blur(0px)",
+              duration: 0.85,
+              ease: "power3.out",
+              scrollTrigger: {
+                trigger: el,
+                start: "top 88%",
+                toggleActions: "play none none none",
+              },
+            },
+          );
+        });
+
+        ScrollTrigger.refresh();
+      });
+
+      /* Modal */
+      const modal = document.getElementById("ds3-modal");
+      const openBtn = document.getElementById("open-modal-demo");
+      const closeBtn = document.getElementById("close-modal-demo");
+      function openModal(e) {
+        if (e) e.preventDefault();
+        modal.classList.add("is-open");
+      }
+      function closeModal(e) {
+        if (e) e.preventDefault();
+        modal.classList.remove("is-open");
+      }
+      if (openBtn) openBtn.addEventListener("click", openModal);
+      if (closeBtn) closeBtn.addEventListener("click", closeModal);
+      if (modal) {
+        modal.addEventListener("click", (e) => {
+          if (e.target === modal) closeModal(e);
+        });
+      }
+    </script>
+  </body>
+</html>

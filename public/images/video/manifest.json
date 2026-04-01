@@ -1,0 +1,6 @@
+{
+  "frameCount": 192,
+  "format": "webp",
+  "pattern": "frame_%05d.webp",
+  "note": "Gerado a partir de video/HOMEMODEL_logo_deconstructing_202604011146.mp4 — ver scripts/extract-hero-frames.mjs"
+}
