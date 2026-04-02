@@ -16,23 +16,25 @@ body {
   background-color: #09090b;
 }
 
-@keyframes header-slide-down {
+@keyframes rainbow-border-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes rainbow-border-hue {
   from {
-    transform: translate3d(0, -100%, 0);
+    filter: hue-rotate(0deg);
   }
   to {
-    transform: translate3d(0, 0, 0);
+    filter: hue-rotate(360deg);
   }
 }
 
-.header-animate-in {
-  animation: header-slide-down 0.75s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-  will-change: transform;
+.canvas-download-btn:hover {
+  box-shadow: 0 0 22px -4px rgba(100, 100, 100, 0.45);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .header-animate-in {
-    animation: none;
-    transform: none;
-  }
+.canvas-download-btn:hover .rainbow-border__inner {
+  background-color: #f4f4f5;
 }
