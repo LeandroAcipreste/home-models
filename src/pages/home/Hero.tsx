@@ -183,7 +183,7 @@ function Hero({ onReady, introLiftSignal = 0 }: HeroProps) {
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
 
-        const dpr = window.devicePixelRatio || 1;
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
         const targetW = Math.floor(w * dpr);
         const targetH = Math.floor(h * dpr);
 
@@ -419,7 +419,7 @@ function Hero({ onReady, introLiftSignal = 0 }: HeroProps) {
       <section ref={sectionRef} className="relative h-[200vh] bg-white">
         <div
           ref={containerRef}
-          className="sticky top-0 h-screen overflow-hidden bg-white"
+          className="sticky top-0 h-dvh overflow-hidden bg-white"
         >
           <NavigateBar />
           <img
@@ -433,7 +433,7 @@ function Hero({ onReady, introLiftSignal = 0 }: HeroProps) {
             aria-hidden
           />
 
-          {/* z-0: branco puro — visível quando o canvas faz fade no scroll */}
+          {/* Fundo branco puro revelado ao final */}
           <div
             className="pointer-events-none absolute inset-0 z-0 bg-white"
             aria-hidden
