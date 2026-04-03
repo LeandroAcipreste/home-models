@@ -415,11 +415,14 @@ function Hero({ onReady, introLiftSignal = 0 }: HeroProps) {
   );
 
   return (
-    <main className="bg-white text-zinc-900">
-      <section ref={sectionRef} className="relative h-[200vh] bg-white">
+    <main className="relative w-screen min-w-0 max-w-[100dvw] overflow-x-clip bg-white text-zinc-900">
+      <section
+        ref={sectionRef}
+        className="relative h-[200vh] w-screen min-w-0 max-w-[100dvw] overflow-x-clip bg-white"
+      >
         <div
           ref={containerRef}
-          className="sticky top-0 h-dvh overflow-hidden bg-white"
+          className="sticky top-0 h-[50dvh] md:h-[70dvh] lg:h-dvh w-screen min-w-0 max-w-[100dvw] p-0 m-0 overflow-hidden bg-white"
         >
           <NavigateBar />
           <img
@@ -429,7 +432,7 @@ function Hero({ onReady, introLiftSignal = 0 }: HeroProps) {
             height={720}
             fetchPriority="high"
             decoding="async"
-            className="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover opacity-0"
+            className="pointer-events-none absolute inset-0 z-0 h-full w-full max-w-none object-cover opacity-0"
             aria-hidden
           />
 
@@ -441,7 +444,7 @@ function Hero({ onReady, introLiftSignal = 0 }: HeroProps) {
 
           <canvas
             ref={canvasRef}
-            className="absolute inset-0 z-10 block h-full w-full"
+            className="absolute inset-0 z-10 block h-full w-full min-w-0 max-w-none"
             aria-hidden
           />
         </div>

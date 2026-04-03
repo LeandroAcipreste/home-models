@@ -11,8 +11,16 @@
   box-sizing: border-box;
 }
 
-body {
+html,
+body,
+#root {
   margin: 0;
+  padding: 0;
+  width: 100%;
+  max-width: 100%;
+}
+
+body {
   background-color: #09090b;
 }
 
@@ -35,7 +43,16 @@ body {
   color: #18181b;
   text-decoration: none;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
   transition: box-shadow 0.3s ease, color 0.3s ease, background-color 0.3s ease;
+}
+
+/* Mobile: highlight de toque e “anel branco” ao animar a borda no Cadastre-se */
+@media (max-width: 639px) {
+  .cadastre-nav-btn [data-rainbow-spin],
+  .cadastre-nav-btn [data-rainbow-hue] {
+    animation: none !important;
+  }
 }
 
 .canvas-download-btn__icon {

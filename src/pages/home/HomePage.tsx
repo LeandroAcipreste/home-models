@@ -24,13 +24,11 @@ function HomePage() {
       <Hero onReady={handleHeroReady} introLiftSignal={introLiftSignal} />
 
       {!introFinished ? (
-        <div className="fixed inset-0 z-50 bg-transparent">
-          <IntroductionVideo
-            readyToReveal={heroReady}
-            onFinish={handleIntroFinish}
-            onLiftStart={handleIntroLiftStart}
-          />
-        </div>
+        <IntroductionVideo
+          readyToReveal={heroReady}
+          onFinish={handleIntroFinish}
+          onLiftStart={handleIntroLiftStart}
+        />
       ) : null}
     </div>
   );

@@ -86,8 +86,8 @@ export default function RainbowBorder({
       style={{ borderRadius: radiusPx }}
     >
       <div style={L.beamLayer}>
-        <div style={L.spinner}>
-          <div style={L.conic} />
+        <div style={L.spinner} data-rainbow-spin>
+          <div style={L.conic} data-rainbow-hue />
         </div>
       </div>
       <div

@@ -33,7 +33,7 @@ function NavigateBar() {
           <Button
             href="#cadastro"
             showIcon={false}
-            className="nav-reveal-item opacity-0 text-xs sm:text-sm"
+            className="cadastre-nav-btn nav-reveal-item opacity-0 text-xs sm:text-sm"
           >
             Cadastre-se
           </Button>
