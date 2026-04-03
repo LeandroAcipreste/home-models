@@ -1,5 +1,51 @@
+# Dependências e saída de build
 node_modules
 dist
-.DS_Store
-*.local
+
+# Vercel (link local do CLI)
 .vercel
+
+# Sistema / SO
+.DS_Store
+Thumbs.db
+*.local
+
+# TypeScript — cache incremental
+*.tsbuildinfo
+
+# Variáveis de ambiente
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Testes e cobertura
+coverage
+.nyc_output
+
+# IDEs
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Cursor (metadados locais do workspace)
+.cursor
+
+# —— Itens não usados pelo app (não importados no Vite / não servidos como rota) ——
+
+# Referência visual / design (template Webflow + tokens; não entra no bundle)
+design-system
+
+# Arte na raiz (duplicatas / PDF / moodboard — não referenciados em src ou public ativos)
+arte-home -fashion.jpeg
+Home Model 2025.pdf
+logo-mode-models.jpeg
+
+# Pôster retirado da Hero; pasta só faz sentido se voltar a usar no código
+public/images/models
