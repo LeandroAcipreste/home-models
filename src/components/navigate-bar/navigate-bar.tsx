@@ -11,7 +11,7 @@ function NavigateBar() {
       <div className="pointer-events-auto mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
         <a
           href="/"
-          className="inline-flex shrink-0"
+          className="nav-reveal-item inline-flex shrink-0 opacity-0"
           aria-label="Home Model — início"
         >
           <RainbowBorder className="inline-flex p-2">
@@ -33,11 +33,14 @@ function NavigateBar() {
           <Button
             href="#cadastro"
             showIcon={false}
-            className="text-xs sm:text-sm"
+            className="nav-reveal-item opacity-0 text-xs sm:text-sm"
           >
             Cadastre-se
           </Button>
-          <Button href="#login" className="text-xs sm:text-sm" />
+          <Button
+            href="#login"
+            className="nav-reveal-item opacity-0 text-xs sm:text-sm"
+          />
         </nav>
       </div>
     </header>

@@ -1,5 +1,4 @@
 import { useRef } from "react";
-import { Sparkles } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -75,6 +74,9 @@ function drawImageCover(
   const ih = img.naturalHeight;
   if (!iw || !ih) return;
 
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+
   const scale = Math.max(cw / iw, ch / ih);
   const dw = iw * scale;
   const dh = ih * scale;
@@ -88,7 +90,7 @@ function drawImageCover(
 const CONSTRUCTION_DURATION_SEC = 3;
 
 /**
- * Fluxo: (1) último frame até lift (2) gsap.to N−1→0 (3) ScrollTrigger no onComplete.
+ * Fluxo: (1) intro 0→N−1 ao abrir a hero (2) scroll N−1→0 ao rolar.
  * Estado mutável de desenho em refs para evitar stale closure com boot async / Strict Mode.
  */
 function Hero({ onReady, introLiftSignal = 0 }: HeroProps) {
@@ -110,6 +112,9 @@ function Hero({ onReady, introLiftSignal = 0 }: HeroProps) {
 
   const runIntroConstructionRef = useRef<(() => void) | null>(null);
   const lastDispatchedLiftRef = useRef(0);
+
+  // Cache para evitar Layout Thrashing no drawFrame
+  const dimensionsRef = useRef({ w: 0, h: 0 });
 
   useGSAP(
     (_ctx, contextSafe) => {
@@ -151,7 +156,7 @@ function Hero({ onReady, introLiftSignal = 0 }: HeroProps) {
           !constructionCompleteRef.current &&
           !prefersReducedRef.current
         ) {
-          idx = images.length - 1;
+          idx = 0;
         } else {
           idx = Math.max(
             0,
@@ -165,9 +170,14 @@ function Hero({ onReady, introLiftSignal = 0 }: HeroProps) {
         const img = images[idx];
         if (!img.complete) return;
 
-        const rect = container.getBoundingClientRect();
-        const w = rect.width;
-        const h = rect.height;
+        let { w, h } = dimensionsRef.current;
+        // Fallback seguro caso o ResizeObserver ainda não tenha disparado no frame 0
+        if (w <= 0 || h <= 0) {
+          const rect = container.getBoundingClientRect();
+          w = rect.width;
+          h = rect.height;
+          dimensionsRef.current = { w, h };
+        }
         if (w <= 0 || h <= 0) return;
 
         const ctx = canvas.getContext("2d");
@@ -197,15 +207,17 @@ function Hero({ onReady, introLiftSignal = 0 }: HeroProps) {
             trigger: section,
             start: "top top",
             end: "bottom bottom",
-            scrub: 2.75,
+            scrub: 4,
             invalidateOnRefresh: true,
           },
         });
 
+        gsap.set(scrollStateRef.current, { frame: fc - 1 });
+
         scrollTimelineRef.current.to(
           scrollStateRef.current,
           {
-            frame: fc - 1,
+            frame: 0,
             ease: "none",
             duration: 1,
             onUpdate: wrap(() => {
@@ -215,10 +227,24 @@ function Hero({ onReady, introLiftSignal = 0 }: HeroProps) {
           0,
         );
 
+        const canvasEl = canvasRef.current;
+        const fadeTargets = canvasEl ? [canvasEl] : [];
+        if (fadeTargets.length) {
+          scrollTimelineRef.current.to(
+            fadeTargets,
+            {
+              opacity: 0,
+              duration: 0.3,
+              ease: "power2.inOut",
+            },
+            0.7,
+          );
+        }
+
         ScrollTrigger.refresh();
         const st = scrollTimelineRef.current.scrollTrigger;
         if (st) {
-          scrollStateRef.current.frame = st.progress * (fc - 1);
+          scrollStateRef.current.frame = (1 - st.progress) * (fc - 1);
         }
         drawFrame();
       });
@@ -236,9 +262,15 @@ function Hero({ onReady, introLiftSignal = 0 }: HeroProps) {
 
         if (prefersReducedRef.current) {
           introActiveRef.current = false;
-          introStateRef.current = { frame: 0 };
+          introStateRef.current = { frame: Math.max(0, fc - 1) };
           constructionCompleteRef.current = true;
-          scrollStateRef.current.frame = 0;
+          scrollStateRef.current.frame = Math.max(0, fc - 1);
+          const navRoot = containerRef.current;
+          if (navRoot) {
+            navRoot.querySelectorAll(".nav-reveal-item").forEach((el) => {
+              el.classList.remove("opacity-0");
+            });
+          }
           setupScrollTimeline();
           drawFrame();
           return;
@@ -248,7 +280,7 @@ function Hero({ onReady, introLiftSignal = 0 }: HeroProps) {
 
         introActiveRef.current = true;
         const lastIdx = fc - 1;
-        gsap.set(introStateRef.current, { frame: lastIdx });
+        gsap.set(introStateRef.current, { frame: 0 });
         drawFrame();
 
         const introOnUpdate = wrap(() => {
@@ -256,14 +288,38 @@ function Hero({ onReady, introLiftSignal = 0 }: HeroProps) {
         });
 
         gsap.to(introStateRef.current, {
-          frame: 0,
+          frame: lastIdx,
           duration: CONSTRUCTION_DURATION_SEC,
           ease: "none",
           onUpdate: introOnUpdate,
           onComplete: wrap(() => {
             introActiveRef.current = false;
-            introStateRef.current = { frame: 0 };
+            introStateRef.current = { frame: lastIdx };
             constructionCompleteRef.current = true;
+            scrollStateRef.current.frame = lastIdx;
+
+            const navRoot = containerRef.current;
+            const navItems = navRoot?.querySelectorAll(".nav-reveal-item");
+
+            if (navItems?.length) {
+              navItems.forEach((el) => {
+                el.classList.remove("opacity-0");
+              });
+
+              gsap.fromTo(
+                navItems,
+                { y: 20, opacity: 0 },
+                {
+                  y: 0,
+                  opacity: 1,
+                  duration: 0.8,
+                  ease: "power3.out",
+                  stagger: 0.15,
+                  clearProps: "all",
+                },
+              );
+            }
+
             setupScrollTimeline();
             drawFrame();
           }),
@@ -321,8 +377,13 @@ function Hero({ onReady, introLiftSignal = 0 }: HeroProps) {
       void boot();
 
       const ro = new ResizeObserver(
-        wrap(() => {
+        wrap((entries: ResizeObserverEntry[]) => {
+          if (!entries.length) return;
+          const { width, height } = entries[0].contentRect;
+          // Atualiza o cache de dimensões ANTES de desenhar
+          dimensionsRef.current = { w: width, h: height };
           ScrollTrigger.refresh();
+          drawFrame();
         }),
       );
       ro.observe(container);
@@ -354,11 +415,11 @@ function Hero({ onReady, introLiftSignal = 0 }: HeroProps) {
   );
 
   return (
-    <main className="bg-zinc-950 text-zinc-100">
-      <section ref={sectionRef} className="relative h-[420vh]">
+    <main className="bg-white text-zinc-900">
+      <section ref={sectionRef} className="relative h-[200vh] bg-white">
         <div
           ref={containerRef}
-          className="sticky top-0 h-screen overflow-hidden bg-zinc-950"
+          className="sticky top-0 h-screen overflow-hidden bg-white"
         >
           <NavigateBar />
           <img
@@ -371,31 +432,18 @@ function Hero({ onReady, introLiftSignal = 0 }: HeroProps) {
             className="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover opacity-0"
             aria-hidden
           />
+
+          {/* z-0: branco puro — visível quando o canvas faz fade no scroll */}
+          <div
+            className="pointer-events-none absolute inset-0 z-0 bg-white"
+            aria-hidden
+          />
+
           <canvas
             ref={canvasRef}
             className="absolute inset-0 z-10 block h-full w-full"
             aria-hidden
           />
-
-          <div
-            className="pointer-events-none absolute inset-0 z-20 bg-linear-to-b from-black/60 via-black/35 to-black/50"
-            style={{ opacity: 0.55 }}
-          />
-
-          <div className="absolute inset-0 z-30 flex items-center justify-center px-6">
-            <div className="mx-auto flex max-w-3xl flex-col items-center gap-4 text-center">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/30 px-4 py-2 text-sm backdrop-blur-sm">
-                <Sparkles className="h-4 w-4 text-emerald-300" />
-                Home Model
-              </div>
-              <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
-                Conteudo visual guiado pelo scroll
-              </h1>
-              <p className="max-w-xl text-zinc-200">
-                Role a pagina para controlar a animacao do background da hero.
-              </p>
-            </div>
-          </div>
         </div>
       </section>
 

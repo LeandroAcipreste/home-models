@@ -12,6 +12,22 @@
     <title>Site Home Model</title>
   </head>
   <body>
+    <script>
+      (function () {
+        try {
+          if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+        } catch (e) {}
+        function toTop() {
+          window.scrollTo(0, 0);
+          if (document.documentElement) document.documentElement.scrollTop = 0;
+          if (document.body) document.body.scrollTop = 0;
+        }
+        toTop();
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", toTop, { once: true });
+        }
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
