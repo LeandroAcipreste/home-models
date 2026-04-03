@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import introVideo from "../../../video/video-de-entrada.mp4";
 
 /** Fallback se a amostragem do canvas falhar (CORS / tainted) */
-const INTRO_BG_FALLBACK = "#09090b";
+const INTRO_BG_FALLBACK = "#ffffff";
 
 type IntroductionVideoProps = {
   /** Chamado quando o painel terminou de subir e a intro pode desmontar */
@@ -73,6 +73,18 @@ function IntroductionVideo({
   const finishFiredRef = useRef(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
+  /** Força o autoplay no mobile lidando com as restrições do Safari/Chrome */
+  useEffect(() => {
+    const video = videoRef.current;
+    if (video) {
+      video.defaultMuted = true;
+      video.muted = true;
+      video.play().catch((err) => {
+        console.warn("Autoplay bloqueado pelo navegador:", err);
+      });
+    }
+  }, []);
+
   const applyBackgroundFromVideo = useCallback(() => {
     const el = videoRef.current;
     if (!el) return;
@@ -121,7 +133,7 @@ function IntroductionVideo({
   };
 
   return (
-    <main className="fixed inset-0 z-50 h-dvh w-screen overflow-hidden bg-transparent m-0 p-0">
+    <main className="fixed inset-0 z-50 h-dvh w-full max-w-full overflow-hidden bg-transparent m-0 p-0">
       <div
         className={`absolute inset-0 flex items-center justify-center transition-transform duration-1000 ease-in-out w-full m-0 p-0 ${
           isLifting ? "-translate-y-full" : "translate-y-0"
@@ -131,9 +143,10 @@ function IntroductionVideo({
       >
         <video
           ref={videoRef}
-          className="mx-auto block h-auto w-[min(92vw,20rem)] max-h-[min(45vh,20rem)] shrink-0 object-contain md:w-[min(72vw,36rem)] md:max-h-[min(62vh,28rem)]"
+          className="mx-auto block h-auto w-[min(92vw,20rem)] max-h-[min(45vh,20rem)] shrink-0 object-contain md:absolute md:inset-0 md:mx-0 md:h-full md:w-full md:max-h-none md:object-cover"
           autoPlay
           muted
+          defaultMuted
           playsInline
           onLoadedMetadata={() => {
             requestAnimationFrame(() => applyBackgroundFromVideo());

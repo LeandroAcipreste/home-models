@@ -11,6 +11,10 @@
   box-sizing: border-box;
 }
 
+html {
+  overflow-x: clip;
+}
+
 html,
 body,
 #root {
@@ -21,7 +25,13 @@ body,
 }
 
 body {
+  overflow-x: clip;
   background-color: #09090b;
+}
+
+#root {
+  overflow-x: clip;
+  min-width: 0;
 }
 
 @keyframes rainbow-border-spin {
@@ -68,4 +78,38 @@ body {
 
 .canvas-download-btn:hover .rainbow-border__inner {
   background-color: #f4f4f5;
+}
+
+/* Segunda dobra — lettering como design_system3.html (.hm-lumens): gradiente recortado, sem caixa branca */
+.second-fold-home-title {
+  margin: 0;
+  max-width: min(100%, 42rem);
+  text-align: center;
+  text-wrap: balance;
+}
+
+.second-fold-home-title-line {
+  display: block;
+  font-family: "TASA Orbiter", Inter, system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+  text-transform: uppercase;
+  background: linear-gradient(
+    125deg,
+    var(--sf-a, #e63946) 0%,
+    var(--sf-b, #f4a261) 50%,
+    var(--sf-c, #9b5de5) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 10px rgba(201, 169, 97, 0.35));
+}
+
+.second-fold-home-title-line:last-child {
+  --sf-a: #8b2942;
+  --sf-b: #d4a5a5;
+  --sf-c: #c9a961;
 }

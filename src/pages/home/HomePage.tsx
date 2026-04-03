@@ -20,7 +20,7 @@ function HomePage() {
   }, []);
 
   return (
-    <div className="relative">
+    <div className="relative min-w-0 w-full overflow-x-clip">
       <Hero onReady={handleHeroReady} introLiftSignal={introLiftSignal} />
 
       {!introFinished ? (
