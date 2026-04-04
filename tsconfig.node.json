@@ -9,6 +9,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
+    "incremental": false,
     "strict": true
   },
   "include": ["vite.config.ts"]
