@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import introVideoMobile from "../../../video/entrance-mobile.mp4";
+import introVideoMobile from "../../../video/entrance-mobile.mov";
 import introVideoDesktop from "../../../video/video-de-entrada.mp4";
 
 /** Igual ao breakpoint `md` do Tailwind — não usar `<source media>` no vídeo (suporte fraco no desktop). */
