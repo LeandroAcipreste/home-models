@@ -6,33 +6,71 @@ import HomePage from "./pages/home/HomePage";
 
 gsap.registerPlugin(ScrollTrigger);
 
+/** Menos reflows em mobile (barra de endereço) e menos risco de loop refresh↔layout */
+ScrollTrigger.config({ ignoreMobileResize: true });
+
 function forceScrollTop() {
   window.scrollTo(0, 0);
   document.documentElement.scrollTop = 0;
   if (document.body) document.body.scrollTop = 0;
 }
 
-/** Cada carregamento/atualização: topo + Lenis alinhado (evita hero no meio da timeline). */
+let scrollTriggerRefreshScheduled = false;
+
+/** Agrupa refreshes no próximo frame — evita thrash quando Lenis + vários triggers montam ao mesmo tempo */
+function scheduleScrollTriggerRefresh(): void {
+  if (scrollTriggerRefreshScheduled) return;
+  scrollTriggerRefreshScheduled = true;
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      scrollTriggerRefreshScheduled = false;
+      ScrollTrigger.refresh();
+    });
+  });
+}
+
+/** Cada carregamento: topo + Lenis alinhado + refresh coalescido */
 function LenisScrollReset() {
   const lenis = useLenis();
 
   useLayoutEffect(() => {
     forceScrollTop();
-    if (lenis) {
-      lenis.scrollTo(0, { immediate: true });
-    }
-    ScrollTrigger.refresh();
+    if (!lenis) return;
+    lenis.scrollTo(0, { immediate: true });
+    scheduleScrollTriggerRefresh();
   }, [lenis]);
 
   return null;
 }
 
-/** Sincroniza Lenis com o motor de scroll do GSAP (Hero / ScrollTrigger). */
+/**
+ * Lenis controla o scroll suave; sem scrollerProxy o ScrollTrigger lê o scroll nativo errado
+ * (comum em produção / Vercel: scrub da Hero e segunda dobra “travam”).
+ */
 function LenisGsapSync() {
   const lenis = useLenis();
 
   useLayoutEffect(() => {
     if (!lenis) return;
+
+    const scroller = document.documentElement;
+
+    ScrollTrigger.scrollerProxy(scroller, {
+      scrollTop(value) {
+        if (arguments.length && typeof value === "number") {
+          lenis.scrollTo(value, { immediate: true });
+        }
+        return lenis.scroll;
+      },
+      getBoundingClientRect() {
+        return {
+          top: 0,
+          left: 0,
+          width: window.innerWidth,
+          height: window.innerHeight,
+        };
+      },
+    });
 
     const onScroll = () => {
       ScrollTrigger.update();
@@ -45,9 +83,13 @@ function LenisGsapSync() {
     gsap.ticker.add(ticker);
     gsap.ticker.lagSmoothing(0);
 
+    scheduleScrollTriggerRefresh();
+
     return () => {
       lenis.off("scroll", onScroll);
       gsap.ticker.remove(ticker);
+      // GSAP: segundo argumento falsy remove o proxy (tipos não incluem null)
+      ScrollTrigger.scrollerProxy(scroller, null as unknown as undefined);
     };
   }, [lenis]);
 
@@ -66,16 +108,18 @@ function App() {
       /* ignore */
     }
     forceScrollTop();
-    ScrollTrigger.refresh();
+    if (reduceMotion) {
+      ScrollTrigger.refresh();
+    }
     const onPageShow = (e: PageTransitionEvent) => {
       if (e.persisted) {
         forceScrollTop();
-        ScrollTrigger.refresh();
+        scheduleScrollTriggerRefresh();
       }
     };
     window.addEventListener("pageshow", onPageShow);
     return () => window.removeEventListener("pageshow", onPageShow);
-  }, []);
+  }, [reduceMotion]);
 
   if (reduceMotion) {
     return <HomePage />;
