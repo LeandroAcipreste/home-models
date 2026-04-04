@@ -83,8 +83,8 @@ function drawImageCover(
   const ih = img.naturalHeight;
   if (!iw || !ih) return;
 
-  ctx.imageSmoothingEnabled = true;
-  ctx.imageSmoothingQuality = "high";
+  // ctx.imageSmoothingEnabled = true;
+  // ctx.imageSmoothingQuality = "high";
 
   const scale = Math.max(cw / iw, ch / ih);
   const dw = iw * scale;
@@ -237,7 +237,8 @@ function Hero({ onReady, introLiftSignal = 0 }: HeroProps) {
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
 
-        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        // 1. Limitamos o DPR a 1.5 máximo para telas gigantes de Desktop
+        const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
         const targetW = Math.floor(w * dpr);
         const targetH = Math.floor(h * dpr);
 
@@ -246,9 +247,11 @@ function Hero({ onReady, introLiftSignal = 0 }: HeroProps) {
           canvas.height = targetH;
           canvas.style.width = `${w}px`;
           canvas.style.height = `${h}px`;
+
+          // 2. setTransform só quando o canvas muda de tamanho físico (evita trabalho por frame)
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         }
 
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         drawImageCover(ctx, img, w, h);
       });
 
