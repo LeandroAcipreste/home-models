@@ -32,6 +32,11 @@ const trailUrls: string[] = TRAIL_FILES.map(
   (f) => `${EFEITO_TRAIL_BASE}/${encodeURIComponent(f)}`,
 );
 
+/** Fundo decorativo da segunda dobra (`public/images/models/backgrounds/`) */
+const SECOND_FOLD_BG = `/images/models/backgrounds/${encodeURIComponent(
+  "background segunda dobra.png",
+)}`;
+
 /** Parâmetros alinhados ao script do template ovo-lumen (Mouse Trail) */
 const D = 90;
 const IN = 0.2;
@@ -204,43 +209,52 @@ function SecondFoldCursor() {
   return (
     <section
       ref={sectionRef}
-      className="hero second-fold-hero relative z-0 flex min-h-[100dvh] w-full min-w-0 flex-col overflow-hidden bg-white"
+      className="hero second-fold-hero relative isolate z-0 flex min-h-[100dvh] w-full min-w-0 flex-col overflow-hidden bg-white"
       aria-label="Segunda dobra"
     >
+      {/* Fundo: sempre atrás; isolate na section evita o PNG “comer” o stacking dos filhos */}
       <div
-        ref={wrapRef}
-        className="image_wrap pointer-events-auto absolute inset-0 z-[5] flex min-h-full items-start justify-start overflow-hidden"
-      >
-        {trailUrls.map((src) => (
-          <div
-            key={src}
-            className="content_img-wrap absolute bottom-auto right-auto aspect-[220/280] w-[min(220px,85vw)] shrink-0 opacity-0"
-          >
-            <img
-              src={src}
-              alt=""
-              className="content_img absolute inset-0 h-full w-full object-contain object-center"
-              loading="eager"
-              fetchPriority="high"
-              decoding="async"
-              draggable={false}
-            />
-          </div>
-        ))}
-      </div>
-
-      <div className="relative z-[18] flex w-full shrink-0 justify-center px-4 pb-4 pt-6 sm:px-6 pointer-events-none">
-        <h2
-          ref={titleRef}
-          className="second-fold-home-title opacity-0 translate-y-12"
+        className="pointer-events-none absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url("${SECOND_FOLD_BG}")` }}
+        aria-hidden
+      />
+      {/* Conteúdo interativo acima do fundo (trail + título) */}
+      <div className="relative z-10 flex min-h-[100dvh] w-full min-w-0 flex-1 flex-col">
+        <div
+          ref={wrapRef}
+          className="image_wrap pointer-events-auto absolute inset-0 z-[1] flex min-h-full items-start justify-start overflow-hidden"
         >
-          <span className="second-fold-home-title-line text-[clamp(1.25rem,5.5vw,3rem)] sm:text-[clamp(1.5rem,6vw,3.5rem)]">
-            Somos a
-          </span>
-          <span className="second-fold-home-title-line mt-1 text-[clamp(1.375rem,6.5vw,3.5rem)] sm:mt-1.5 sm:text-[clamp(1.625rem,7vw,4rem)]">
-            Home Model
-          </span>
-        </h2>
+          {trailUrls.map((src) => (
+            <div
+              key={src}
+              className="content_img-wrap absolute bottom-auto right-auto aspect-[220/280] w-[min(220px,85vw)] shrink-0 opacity-0"
+            >
+              <img
+                src={src}
+                alt=""
+                className="content_img absolute inset-0 h-full w-full object-contain object-center"
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
+                draggable={false}
+              />
+            </div>
+          ))}
+        </div>
+
+        <div className="relative z-[20] flex w-full shrink-0 justify-center px-4 pb-4 pt-6 sm:px-6 pointer-events-none">
+          <h2
+            ref={titleRef}
+            className="second-fold-home-title opacity-0 translate-y-12"
+          >
+            <span className="second-fold-home-title-line text-[clamp(1.25rem,5.5vw,3rem)] sm:text-[clamp(1.5rem,6vw,3.5rem)]">
+              Somos a
+            </span>
+            <span className="second-fold-home-title-line mt-1 text-[clamp(1.375rem,6.5vw,3.5rem)] sm:mt-1.5 sm:text-[clamp(1.625rem,7vw,4rem)]">
+              Home Model
+            </span>
+          </h2>
+        </div>
       </div>
     </section>
   );

@@ -1,5 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import introVideo from "../../../video/video-de-entrada.mp4";
+import introVideoMobile from "../../../video/entrance-mobile.mp4";
+import introVideoDesktop from "../../../video/video-de-entrada.mp4";
+
+/** Alinhado ao breakpoint `md` do Tailwind (768px): abaixo = mobile, a partir de tablet */
+const INTRO_VIDEO_MOBILE_MQ = "(max-width: 767px)";
+
+function getIntroVideoSrcForViewport(): string {
+  if (typeof window === "undefined") return introVideoDesktop;
+  return window.matchMedia(INTRO_VIDEO_MOBILE_MQ).matches
+    ? introVideoMobile
+    : introVideoDesktop;
+}
 
 /** Fallback se a amostragem do canvas falhar (CORS / tainted) */
 const INTRO_BG_FALLBACK = "#ffffff";
@@ -69,9 +80,23 @@ function IntroductionVideo({
   const [isLifting, setIsLifting] = useState(false);
   const [videoFinished, setVideoFinished] = useState(false);
   const [panelBg, setPanelBg] = useState(INTRO_BG_FALLBACK);
+  const [introSrc, setIntroSrc] = useState<string>(() =>
+    getIntroVideoSrcForViewport(),
+  );
   /** Evita chamar onFinish duas vezes (transitionend + fallback) */
   const finishFiredRef = useRef(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  /** Mantém o ficheiro de vídeo alinhado ao viewport (mobile vs tablet/desktop) */
+  useEffect(() => {
+    const mq = window.matchMedia(INTRO_VIDEO_MOBILE_MQ);
+    const sync = () => {
+      setIntroSrc(mq.matches ? introVideoMobile : introVideoDesktop);
+    };
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
 
   /** Força o autoplay no mobile lidando com as restrições do Safari/Chrome */
   useEffect(() => {
@@ -83,7 +108,7 @@ function IntroductionVideo({
         console.warn("Autoplay bloqueado pelo navegador:", err);
       });
     }
-  }, []);
+  }, [introSrc]);
 
   const applyBackgroundFromVideo = useCallback(() => {
     const el = videoRef.current;
@@ -142,8 +167,9 @@ function IntroductionVideo({
         onTransitionEnd={handleLiftPanelTransitionEnd}
       >
         <video
+          key={introSrc}
           ref={videoRef}
-          className="mx-auto block h-auto w-[min(92vw,20rem)] max-h-[min(45vh,20rem)] shrink-0 object-contain md:absolute md:inset-0 md:mx-0 md:h-full md:w-full md:max-h-none md:object-cover"
+          className="absolute inset-0 z-0 h-full w-full min-h-0 object-cover"
           autoPlay
           muted
           defaultMuted
@@ -155,7 +181,7 @@ function IntroductionVideo({
           onEnded={() => setVideoFinished(true)}
           onError={() => setVideoFinished(true)}
         >
-          <source src={introVideo} type="video/mp4" />
+          <source src={introSrc} type="video/mp4" />
         </video>
       </div>
     </main>
