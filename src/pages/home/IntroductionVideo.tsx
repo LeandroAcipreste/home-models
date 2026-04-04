@@ -140,7 +140,6 @@ function IntroductionVideo({
             }`}
           autoPlay
           muted
-          defaultMuted
           playsInline
           preload="auto"
           onLoadedData={() => {
