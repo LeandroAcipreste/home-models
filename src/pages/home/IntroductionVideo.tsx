@@ -2,6 +2,16 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import introVideoMobile from "../../../video/entrance-mobile.mp4";
 import introVideoDesktop from "../../../video/video-de-entrada.mp4";
 
+/** Igual ao breakpoint `md` do Tailwind — não usar `<source media>` no vídeo (suporte fraco no desktop). */
+const INTRO_VIDEO_MOBILE_MQ = "(max-width: 767px)";
+
+function introSrcForViewport(): string {
+  if (typeof window === "undefined") return introVideoDesktop;
+  return window.matchMedia(INTRO_VIDEO_MOBILE_MQ).matches
+    ? introVideoMobile
+    : introVideoDesktop;
+}
+
 /** Fallback branco puro para matar o flash escuro inicial */
 const INTRO_BG_FALLBACK = "#ffffff";
 
@@ -68,21 +78,36 @@ function IntroductionVideo({
 
   // Estado para matar o fundo preto: o vídeo começa invisível e só aparece quando tem imagem
   const [isVideoReady, setIsVideoReady] = useState(false);
+  const [introSrc, setIntroSrc] = useState<string>(() => introSrcForViewport());
 
   const finishFiredRef = useRef(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
-  /** Força o autoplay no mobile lidando com as restrições rigorosas */
+  /** Escolhe mobile vs desktop de forma fiável (Chrome ignora `media` em `<source>` do vídeo). */
+  useEffect(() => {
+    const mq = window.matchMedia(INTRO_VIDEO_MOBILE_MQ);
+    const sync = () => {
+      setIntroSrc(mq.matches ? introVideoMobile : introVideoDesktop);
+    };
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  useEffect(() => {
+    setIsVideoReady(false);
+  }, [introSrc]);
+
+  /** Autoplay silencioso após o URL estar definido */
   useEffect(() => {
     const video = videoRef.current;
-    if (video) {
-      video.defaultMuted = true;
-      video.muted = true;
-      video.play().catch((err) => {
-        console.warn("Autoplay bloqueado pelo navegador:", err);
-      });
-    }
-  }, []);
+    if (!video) return;
+    video.defaultMuted = true;
+    video.muted = true;
+    void video.play().catch((err) => {
+      console.warn("Autoplay bloqueado pelo navegador:", err);
+    });
+  }, [introSrc]);
 
   const applyBackgroundFromVideo = useCallback(() => {
     const el = videoRef.current;
@@ -134,10 +159,11 @@ function IntroductionVideo({
         onTransitionEnd={handleLiftPanelTransitionEnd}
       >
         <video
+          key={introSrc}
           ref={videoRef}
-          /* A mágica do fade-in que esconde o preto do iOS: opacity-0 no início, opacity-100 quando pronto */
           className={`absolute inset-0 z-0 h-full w-full min-h-0 object-cover transition-opacity duration-300 ${isVideoReady ? "opacity-100" : "opacity-0"
             }`}
+          src={introSrc}
           autoPlay
           muted
           playsInline
@@ -148,11 +174,7 @@ function IntroductionVideo({
           }}
           onEnded={() => setVideoFinished(true)}
           onError={() => setVideoFinished(true)}
-        >
-          {/* O HTML5 resolve qual vídeo carregar instantaneamente, sem atrasos de JS! */}
-          <source src={introVideoMobile} type="video/mp4" media="(max-width: 767px)" />
-          <source src={introVideoDesktop} type="video/mp4" media="(min-width: 768px)" />
-        </video>
+        />
       </div>
     </main>
   );

@@ -96,7 +96,8 @@ function drawImageCover(
   ctx.drawImage(img, dx, dy, dw, dh);
 }
 
-const CONSTRUCTION_DURATION_SEC = 3;
+/** Duração da animação inicial 0→N−1 (após o lift do vídeo); mais alto = construção mais lenta e legível */
+const CONSTRUCTION_DURATION_SEC = 5.5;
 
 /**
  * Fluxo: (1) intro 0→N−1 ao abrir a hero (2) scroll N−1→0 ao rolar.
