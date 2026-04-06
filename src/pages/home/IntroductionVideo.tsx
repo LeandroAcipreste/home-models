@@ -145,11 +145,24 @@ function IntroductionVideo({
     video.playsInline = true;
     video.preload = "metadata";
 
+    let interactionPlayBound = false;
+    const playOnInteraction = () => {
+      void video.play().catch(() => {
+        /* mantém aguardando nova interação */
+      });
+    };
+    const bindInteractionPlay = () => {
+      if (interactionPlayBound) return;
+      interactionPlayBound = true;
+      window.addEventListener("pointerdown", playOnInteraction, { once: true });
+      window.addEventListener("keydown", playOnInteraction, { once: true });
+    };
+
     const play = () => {
       void video.play().catch((err) => {
         console.warn("Autoplay bloqueado pelo navegador:", err);
-        /* Sem onEnded a intro nunca liberaria mesmo com a hero pronta */
-        setVideoFinished(true);
+        // Não finaliza automaticamente: tenta novamente na primeira interação.
+        bindInteractionPlay();
       });
     };
 
@@ -160,6 +173,8 @@ function IntroductionVideo({
       video.load();
       play();
       return () => {
+        window.removeEventListener("pointerdown", playOnInteraction);
+        window.removeEventListener("keydown", playOnInteraction);
         video.removeAttribute("src");
         video.load();
       };
@@ -181,13 +196,19 @@ function IntroductionVideo({
         video.load();
         play();
       });
-      return () => hls?.destroy();
+      return () => {
+        window.removeEventListener("pointerdown", playOnInteraction);
+        window.removeEventListener("keydown", playOnInteraction);
+        hls?.destroy();
+      };
     }
 
     video.src = introSource.fallback;
     video.load();
     play();
     return () => {
+      window.removeEventListener("pointerdown", playOnInteraction);
+      window.removeEventListener("keydown", playOnInteraction);
       video.removeAttribute("src");
       video.load();
     };
