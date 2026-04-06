@@ -1,0 +1,22 @@
+.canvas-download-btn {
+  color: #18181b;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: box-shadow 0.3s ease, color 0.3s ease, background-color 0.3s ease;
+}
+
+.canvas-download-btn__icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: hsl(0, 95%, 55%);
+  animation: rainbow-border-hue 10s linear infinite;
+}
+
+.canvas-download-btn:hover {
+  box-shadow: 0 0 22px -4px rgba(100, 100, 100, 0.45);
+}
+
+.canvas-download-btn:hover .rainbow-border__inner {
+  background-color: #f4f4f5;
+}

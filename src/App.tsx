@@ -1,8 +1,9 @@
-import { useLayoutEffect } from "react";
+import { useLayoutEffect, useMemo } from "react";
+import { RouterProvider } from "react-router-dom";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ReactLenis, useLenis } from "lenis/react";
-import HomePage from "./pages/home/HomePage";
+import { createAppRouter } from "./routes";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -45,7 +46,7 @@ function LenisScrollReset() {
 
 /**
  * Lenis controla o scroll suave; sem scrollerProxy o ScrollTrigger lê o scroll nativo errado
- * (comum em produção / Vercel: scrub da Hero e segunda dobra “travam”).
+ * (comum em produção / Vercel).
  */
 function LenisGsapSync() {
   const lenis = useLenis();
@@ -97,6 +98,8 @@ function LenisGsapSync() {
 }
 
 function App() {
+  const router = useMemo(() => createAppRouter(), []);
+
   const reduceMotion =
     typeof window !== "undefined" &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -122,7 +125,7 @@ function App() {
   }, [reduceMotion]);
 
   if (reduceMotion) {
-    return <HomePage />;
+    return <RouterProvider router={router} />;
   }
 
   return (
@@ -139,7 +142,7 @@ function App() {
     >
       <LenisGsapSync />
       <LenisScrollReset />
-      <HomePage />
+      <RouterProvider router={router} />
     </ReactLenis>
   );
 }

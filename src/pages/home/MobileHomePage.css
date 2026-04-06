@@ -1,0 +1,32 @@
+.mobile-home-btn {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: none;
+  text-decoration: none;
+  display: block;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-home-btn--visible {
+  animation: mobile-btn-reveal 0.55s cubic-bezier(0.33, 1, 0.68, 1) both;
+  animation-delay: var(--btn-delay, 0s);
+}
+
+@keyframes mobile-btn-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobile-home-btn--visible {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}

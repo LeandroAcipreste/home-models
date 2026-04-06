@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import Button from "../button/button";
 import RainbowBorder from "../rainbow-border/RainbowBorder";
 import logoHomeModel from "./logo-mode-models.jpg";
@@ -9,8 +10,8 @@ function NavigateBar() {
       role="banner"
     >
       <div className="pointer-events-auto mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
-        <a
-          href="/"
+        <Link
+          to="/"
           className="nav-reveal-item inline-flex shrink-0 opacity-0"
           aria-label="Home Model — início"
         >
@@ -24,7 +25,7 @@ function NavigateBar() {
               decoding="async"
             />
           </RainbowBorder>
-        </a>
+        </Link>
 
         <nav
           className="flex shrink-0 items-center gap-2 sm:gap-3"

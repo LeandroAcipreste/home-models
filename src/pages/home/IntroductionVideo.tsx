@@ -2,8 +2,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import introVideoMobile from "../../../video/entrance-mobile.mp4";
 import introVideoDesktop from "../../../video/video-de-entrada.mp4";
 
-/** Igual ao breakpoint `md` do Tailwind — não usar `<source media>` no vídeo (suporte fraco no desktop). */
-const INTRO_VIDEO_MOBILE_MQ = "(max-width: 767px)";
+/** Mobile até 639px (breakpoint `sm` do Tailwind); tablet e acima usam o vídeo desktop. */
+const INTRO_VIDEO_MOBILE_MQ = "(max-width: 639px)";
 
 function introSrcForViewport(): string {
   if (typeof window === "undefined") return introVideoDesktop;
@@ -14,6 +14,17 @@ function introSrcForViewport(): string {
 
 /** Fallback branco puro para matar o flash escuro inicial */
 const INTRO_BG_FALLBACK = "#ffffff";
+
+/** Evita painel fullscreen preto quando o vídeo tem letterbox / bordas escuras */
+function isSampledBgTooDark(rgb: string): boolean {
+  const m = rgb.match(/\d+/g);
+  if (!m || m.length < 3) return true;
+  const r = Number(m[0]);
+  const g = Number(m[1]);
+  const b = Number(m[2]);
+  const luma = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luma < 0.14;
+}
 
 type IntroductionVideoProps = {
   onFinish?: () => void;
@@ -83,6 +94,16 @@ function IntroductionVideo({
   const finishFiredRef = useRef(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
+  /** Último recurso: remove o overlay se algo travar a sequência normal */
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      if (finishFiredRef.current) return;
+      finishFiredRef.current = true;
+      onFinish?.();
+    }, 35000);
+    return () => window.clearTimeout(id);
+  }, [onFinish]);
+
   /** Escolhe mobile vs desktop de forma fiável (Chrome ignora `media` em `<source>` do vídeo). */
   useEffect(() => {
     const mq = window.matchMedia(INTRO_VIDEO_MOBILE_MQ);
@@ -106,6 +127,8 @@ function IntroductionVideo({
     video.muted = true;
     void video.play().catch((err) => {
       console.warn("Autoplay bloqueado pelo navegador:", err);
+      /* Sem onEnded a intro nunca liberaria mesmo com a hero pronta */
+      setVideoFinished(true);
     });
   }, [introSrc]);
 
@@ -113,7 +136,7 @@ function IntroductionVideo({
     const el = videoRef.current;
     if (!el) return;
     const sampled = sampleVideoBackground(el);
-    if (sampled) setPanelBg(sampled);
+    if (sampled && !isSampledBgTooDark(sampled)) setPanelBg(sampled);
   }, []);
 
   useEffect(() => {

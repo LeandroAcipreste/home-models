@@ -1,0 +1,75 @@
+@keyframes rainbow-border-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes rainbow-border-hue {
+  from {
+    filter: hue-rotate(0deg);
+  }
+  to {
+    filter: hue-rotate(360deg);
+  }
+}
+
+.rainbow-border {
+  --rb-radius: 12px;
+  --rb-border: 2px;
+  --rb-inner-bg: #ffffff;
+  --rb-conic-start: 0deg;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: var(--rb-radius);
+}
+
+/* Arco-íris animado em pseudo-elemento.
+   A primeira e a última cor são iguais para evitar quebra na emenda. */
+.rainbow-border::before {
+  content: "";
+  position: absolute;
+  inset: -140%;
+  z-index: -2;
+  border-radius: inherit;
+  background: conic-gradient(
+    from var(--rb-conic-start),
+    hsl(0, 95%, 56%),
+    hsl(45, 95%, 56%),
+    hsl(90, 95%, 56%),
+    hsl(135, 95%, 56%),
+    hsl(180, 95%, 56%),
+    hsl(225, 95%, 56%),
+    hsl(270, 95%, 56%),
+    hsl(315, 95%, 56%),
+    hsl(0, 95%, 56%)
+  );
+  animation:
+    rainbow-border-spin 4s linear infinite,
+    rainbow-border-hue 10s linear infinite;
+  will-change: transform, filter;
+}
+
+/* Fundo branco interno por cima do gradiente */
+.rainbow-border::after {
+  content: "";
+  position: absolute;
+  inset: var(--rb-border);
+  z-index: -1;
+  border-radius: calc(var(--rb-radius) - var(--rb-border));
+  background: var(--rb-inner-bg);
+  transition: background-color 0.3s ease;
+}
+
+.rainbow-border__content {
+  position: relative;
+  z-index: 0;
+  border-radius: inherit;
+}
+
+/* Mobile: mantém o comportamento já usado no botão de cadastro */
+@media (max-width: 639px) {
+  .cadastre-nav-btn .rainbow-border::before {
+    animation: none !important;
+  }
+}

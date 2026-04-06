@@ -1,11 +1,9 @@
 import { useRef } from "react";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import NavigateBar from "../../components/navigate-bar/navigate-bar";
-import SecondFoldCursor from "./SecondFoldCursor";
 
-gsap.registerPlugin(ScrollTrigger, useGSAP);
+gsap.registerPlugin(useGSAP);
 
 type HeroManifest = {
   frameCount: number;
@@ -14,6 +12,8 @@ type HeroManifest = {
 export type HeroProps = {
   onReady?: () => void;
   introLiftSignal?: number;
+  /** Chamado no mesmo instante em que os botões do header entram (após a construção ou fallback) */
+  onHeaderNavReveal?: () => void;
 };
 
 function frameUrl(index: number) {
@@ -33,12 +33,11 @@ function loadSingleFrame(index: number): Promise<HTMLImageElement> {
     const img = new Image();
     img.decoding = "async";
 
-    // A mágica: Força a placa de vídeo a mastigar os pixels antes de liberar o frame
     img.onload = () => {
       img
         .decode()
         .then(() => resolve(img))
-        .catch(() => resolve(img)); // Em caso de erro obscuro de decode, resolve silenciosamente para não quebrar a sequência
+        .catch(() => resolve(img));
     };
 
     img.onerror = () =>
@@ -83,9 +82,6 @@ function drawImageCover(
   const ih = img.naturalHeight;
   if (!iw || !ih) return;
 
-  // ctx.imageSmoothingEnabled = true;
-  // ctx.imageSmoothingQuality = "high";
-
   const scale = Math.max(cw / iw, ch / ih);
   const dw = iw * scale;
   const dh = ih * scale;
@@ -96,19 +92,16 @@ function drawImageCover(
   ctx.drawImage(img, dx, dy, dw, dh);
 }
 
-/** Duração da animação inicial 0→N−1 (após o lift do vídeo); mais alto = construção mais lenta e legível */
 const CONSTRUCTION_DURATION_SEC = 5.5;
 
-/**
- * Fluxo: (1) intro 0→N−1 ao abrir a hero (2) scroll N−1→0 ao rolar.
- * Estado mutável de desenho em refs para evitar stale closure com boot async / Strict Mode.
- */
-function Hero({ onReady, introLiftSignal = 0 }: HeroProps) {
+/** Fluxo: animação de construção 0→N−1; depois o último frame permanece (sem scrub no scroll). */
+function Hero({ onReady, introLiftSignal = 0, onHeaderNavReveal }: HeroProps) {
   const sectionRef = useRef<HTMLElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const onHeaderNavRevealRef = useRef(onHeaderNavReveal);
+  onHeaderNavRevealRef.current = onHeaderNavReveal;
 
-  /** Fonte única da verdade para drawFrame / tweens (sempre leitura atual) */
   const heroImagesRef = useRef<HTMLImageElement[]>([]);
   const heroFrameCountRef = useRef(0);
   const scrollStateRef = useRef({ frame: 0 });
@@ -122,15 +115,13 @@ function Hero({ onReady, introLiftSignal = 0 }: HeroProps) {
   const runIntroConstructionRef = useRef<(() => void) | null>(null);
   const lastDispatchedLiftRef = useRef(0);
 
-  // Cache para evitar Layout Thrashing no drawFrame
   const dimensionsRef = useRef({ w: 0, h: 0 });
 
   useGSAP(
     (_ctx, contextSafe) => {
-      if (!contextSafe) return;
-      const wrap = contextSafe;
+      // CORREÇÃO 1: Fallback seguro caso o contextSafe venha undefined da lib do GSAP
+      const wrap = contextSafe || ((fn: Function) => fn as any);
 
-      // Forçado para false: A animação TEM que rodar 100% das vezes
       prefersReducedRef.current = false;
 
       const section = sectionRef.current;
@@ -139,59 +130,21 @@ function Hero({ onReady, introLiftSignal = 0 }: HeroProps) {
       if (!section || !container || !canvasEl) return;
 
       let cancelled = false;
-      let heroScrollTl: ReturnType<typeof gsap.timeline> | null = null;
+      let heroReadyNotified = false;
+      let lastCanvasDraw: { idx: number; tw: number; th: number } | null = null;
 
-      /**
-       * Timeline de scroll (desconstrução N−1 → 0 + fade do canvas). Só faz sentido depois de
-       * `lockFrameToLast()` fixar `scrollStateRef` no último frame — por isso é chamada de lá.
-       */
-      const setupHeroScrollTimeline = wrap(() => {
-        const fc = heroFrameCountRef.current;
-        if (!fc || cancelled) return;
+      // CORREÇÃO 2: Removido o wrap() daqui! É uma função React pura, o GSAP não deve interceptar.
+      const notifyHeroReady = () => {
+        if (cancelled || heroReadyNotified) return;
+        heroReadyNotified = true;
+        console.log("🟢 [Hero] Sinal de READY enviado para a HomePage!");
+        onReady?.();
+      };
 
-        heroScrollTl?.kill();
-        heroScrollTl = gsap.timeline({
-          scrollTrigger: {
-            trigger: section,
-            start: "top top",
-            end: "bottom top",
-            // Inércia / smooth scrub (segundos de lag em relação ao scroll)
-            scrub: 2.5,
-          },
-        });
-
-        heroScrollTl.to(
-          scrollStateRef.current,
-          {
-            frame: 0,
-            ease: "none",
-            onUpdate: () => {
-              if (!introActiveRef.current) {
-                drawFrame();
-              }
-            },
-          },
-          0,
-        );
-
-        heroScrollTl.to(
-          canvasEl,
-          {
-            opacity: 0,
-            ease: "power2.inOut",
-            duration: 0.2,
-          },
-          0.8,
-        );
-      });
-
-      /**
-       * drawFrame sempre via wrap: leitura fresca de refs + DOM no momento da chamada.
-       */
       const drawFrame = wrap(() => {
-        const container = containerRef.current;
+        const containerEl = containerRef.current;
         const canvas = canvasRef.current;
-        if (!container || !canvas) return;
+        if (!containerEl || !canvas) return;
 
         const images = heroImagesRef.current;
         const frameCount = heroFrameCountRef.current;
@@ -225,9 +178,8 @@ function Hero({ onReady, introLiftSignal = 0 }: HeroProps) {
         if (!img.complete) return;
 
         let { w, h } = dimensionsRef.current;
-        // Fallback seguro caso o ResizeObserver ainda não tenha disparado no frame 0
         if (w <= 0 || h <= 0) {
-          const rect = container.getBoundingClientRect();
+          const rect = containerEl.getBoundingClientRect();
           w = rect.width;
           h = rect.height;
           dimensionsRef.current = { w, h };
@@ -237,7 +189,6 @@ function Hero({ onReady, introLiftSignal = 0 }: HeroProps) {
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
 
-        // 1. Limitamos o DPR a 1.5 máximo para telas gigantes de Desktop
         const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
         const targetW = Math.floor(w * dpr);
         const targetH = Math.floor(h * dpr);
@@ -247,25 +198,29 @@ function Hero({ onReady, introLiftSignal = 0 }: HeroProps) {
           canvas.height = targetH;
           canvas.style.width = `${w}px`;
           canvas.style.height = `${h}px`;
-
-          // 2. setTransform só quando o canvas muda de tamanho físico (evita trabalho por frame)
           ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         }
 
+        if (
+          lastCanvasDraw &&
+          lastCanvasDraw.idx === idx &&
+          lastCanvasDraw.tw === targetW &&
+          lastCanvasDraw.th === targetH
+        ) {
+          return;
+        }
+
         drawImageCover(ctx, img, w, h);
+        lastCanvasDraw = { idx, tw: targetW, th: targetH };
       });
 
-      /** Após a animação inicial: último frame fixo até sair da hero (sem scrub por scroll). */
       const lockFrameToLast = wrap(() => {
         const fc = heroFrameCountRef.current;
         if (!fc) return;
         gsap.set(scrollStateRef.current, { frame: fc - 1 });
-        const canvasEl = canvasRef.current;
-        if (canvasEl) gsap.set(canvasEl, { opacity: 1 });
+        const c = canvasRef.current;
+        if (c) gsap.set(c, { opacity: 1 });
         drawFrame();
-        // --- RESTAURAÇÃO DO SCROLL COM ALTURA ENXUTA (amarrada ao fim da section) ---
-        setupHeroScrollTimeline();
-        ScrollTrigger.refresh();
       });
 
       const runIntroConstruction = wrap(() => {
@@ -274,6 +229,7 @@ function Hero({ onReady, introLiftSignal = 0 }: HeroProps) {
         const fc = heroFrameCountRef.current;
         if (!fc) {
           pendingIntroConstructionRef.current = true;
+          onHeaderNavRevealRef.current?.();
           return;
         }
 
@@ -284,6 +240,7 @@ function Hero({ onReady, introLiftSignal = 0 }: HeroProps) {
           introStateRef.current = { frame: Math.max(0, fc - 1) };
           constructionCompleteRef.current = true;
           scrollStateRef.current.frame = Math.max(0, fc - 1);
+          onHeaderNavRevealRef.current?.();
           const navRoot = containerRef.current;
           if (navRoot) {
             navRoot.querySelectorAll(".nav-reveal-item").forEach((el) => {
@@ -319,6 +276,8 @@ function Hero({ onReady, introLiftSignal = 0 }: HeroProps) {
             const navRoot = containerRef.current;
             const navItems = navRoot?.querySelectorAll(".nav-reveal-item");
 
+            onHeaderNavRevealRef.current?.();
+
             if (navItems?.length) {
               navItems.forEach((el) => {
                 el.classList.remove("opacity-0");
@@ -345,23 +304,36 @@ function Hero({ onReady, introLiftSignal = 0 }: HeroProps) {
 
       runIntroConstructionRef.current = runIntroConstruction;
 
-      const refreshHandler = wrap(() => {
-        if (heroFrameCountRef.current <= 0) return;
-        drawFrame();
-      });
-
       const boot = async () => {
         try {
+          console.log("⏳ [Hero] Iniciando fetch do manifest.json...");
           const res = await fetch("/images/video/manifest.json");
-          if (!res.ok) return;
+
+          if (!res.ok) {
+            console.warn("⚠️ [Hero] Manifest.json retornou erro:", res.status);
+            notifyHeroReady();
+            return;
+          }
+
           const manifest = (await res.json()) as HeroManifest;
           const manifestCount = manifest.frameCount;
-          if (!manifestCount || cancelled) return;
+
+          if (cancelled) return;
+          if (!manifestCount) {
+            console.warn("⚠️ [Hero] Manifest sem frameCount.");
+            notifyHeroReady();
+            return;
+          }
+
+          console.log("✅ [Hero] Manifest carregado, avisando a Home para liberar o vídeo...");
+          // Libera a intro imediatamente antes do preload longo dos frames
+          notifyHeroReady();
 
           let loadedImages: HTMLImageElement[];
           try {
             loadedImages = await preloadFramesResilient(manifestCount);
-          } catch {
+          } catch (err) {
+            console.error("❌ [Hero] Erro crítico ao carregar frames:", err);
             return;
           }
 
@@ -376,19 +348,15 @@ function Hero({ onReady, introLiftSignal = 0 }: HeroProps) {
             }
 
             drawFrame();
-            onReady?.();
 
             if (pendingIntroConstructionRef.current) {
               runIntroConstruction();
             }
-            // Scroll timeline: criada em lockFrameToLast() quando o último frame está fixo
-            // (após intro ou prefersReduced), para o scrub partir de N−1 → 0.
           })();
 
-          if (cancelled) return;
-          ScrollTrigger.addEventListener("refresh", refreshHandler);
-        } catch {
-          /* manifest / rede */
+        } catch (err) {
+          console.error("❌ [Hero] Falha geral no boot:", err);
+          notifyHeroReady();
         }
       };
 
@@ -399,18 +367,13 @@ function Hero({ onReady, introLiftSignal = 0 }: HeroProps) {
           if (!entries.length) return;
           const { width, height } = entries[0].contentRect;
 
-          // 1. Otimização: Ignorar mudanças minúsculas causadas pela barra de endereço do mobile
           const wDiff = Math.abs(dimensionsRef.current.w - width);
           const hDiff = Math.abs(dimensionsRef.current.h - height);
 
-          // Só recalcula se a largura mudar (ex: girar o celular) ou se a altura mudar drasticamente
           if (wDiff < 2 && hDiff < 60) return;
 
-          // Atualiza o cache
           dimensionsRef.current = { w: width, h: height };
 
-          // 2. Removemos o ScrollTrigger.refresh() que travava a thread do scroll
-          // 3. Colocamos o drawFrame no requestAnimationFrame para não bloquear a UI
           requestAnimationFrame(() => {
             drawFrame();
           });
@@ -420,10 +383,7 @@ function Hero({ onReady, introLiftSignal = 0 }: HeroProps) {
 
       return () => {
         cancelled = true;
-        heroScrollTl?.kill();
-        heroScrollTl = null;
         ro.disconnect();
-        ScrollTrigger.removeEventListener("refresh", refreshHandler);
         runIntroConstructionRef.current = null;
       };
     },
@@ -445,14 +405,13 @@ function Hero({ onReady, introLiftSignal = 0 }: HeroProps) {
 
   return (
     <main className="relative w-full min-w-0 overflow-x-clip bg-white text-zinc-900">
-      {/* Altura da secção = altura do frame (canvas); evita faixa branca vazia abaixo do vídeo */}
       <section
         ref={sectionRef}
-        className="relative mb-12 h-[50dvh] md:h-[70dvh] lg:h-dvh w-full min-w-0 shrink-0 overflow-x-clip bg-white"
+        className="relative w-full min-w-0 shrink-0 overflow-x-clip bg-white"
       >
         <div
           ref={containerRef}
-          className="sticky top-0 h-full min-h-0 w-full min-w-0 p-0 m-0 overflow-hidden bg-white"
+          className="sticky top-0 z-20 h-[50dvh] md:h-[70dvh] lg:h-dvh min-h-0 w-full min-w-0 p-0 m-0 overflow-hidden bg-white"
         >
           <NavigateBar />
           <img
@@ -466,7 +425,6 @@ function Hero({ onReady, introLiftSignal = 0 }: HeroProps) {
             aria-hidden
           />
 
-          {/* Fundo branco puro revelado ao final */}
           <div
             className="pointer-events-none absolute inset-0 z-0 bg-white"
             aria-hidden
@@ -479,8 +437,6 @@ function Hero({ onReady, introLiftSignal = 0 }: HeroProps) {
           />
         </div>
       </section>
-
-      <SecondFoldCursor />
     </main>
   );
 }

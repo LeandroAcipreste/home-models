@@ -1,0 +1,186 @@
+/* Página Quem Somos — leque de fotos + túnel de anéis */
+.qs-page {
+  --qs-font-serif: "Instrument Serif", Georgia, "Times New Roman", serif;
+}
+
+/* --- Leque --- */
+.qs-fan-perspective-shell {
+  perspective: 2000px;
+  perspective-origin: 50% 42%;
+}
+
+.qs-fan-tilt-layer {
+  transform-style: preserve-3d;
+  transform: rotateX(1deg);
+}
+
+.qs-fan-layout {
+  position: relative;
+  width: 601px;
+  max-width: min(100%, 601px);
+  aspect-ratio: 601 / 416;
+  height: auto;
+  transform-style: preserve-3d;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (max-width: 991px) {
+  .qs-fan-perspective-shell {
+    perspective: 1300px;
+  }
+
+  .qs-fan-layout {
+    width: 400px;
+    max-width: min(100%, 400px);
+    aspect-ratio: 400 / 277;
+  }
+}
+
+@media (max-width: 767px) {
+  .qs-fan-layout {
+    width: 300px;
+    max-width: min(100%, 300px);
+    aspect-ratio: 300 / 208;
+  }
+}
+
+.qs-fan-card-base {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  box-shadow: 0 16px 40px rgb(0 0 0 / 0.12), 0 4px 12px rgb(0 0 0 / 0.06);
+}
+
+.qs-fan-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+
+/* --- Título --- */
+.qs-title {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  max-width: min(100%, 42rem);
+  text-align: center;
+  text-wrap: balance;
+  text-rendering: geometricPrecision;
+}
+
+.qs-title-line {
+  display: block;
+  font-family: var(--qs-font-serif);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  line-height: 1.06;
+  text-transform: none;
+  color: #171717;
+  -webkit-text-fill-color: #171717;
+  text-shadow: none;
+}
+
+/* --- Túnel de anéis --- */
+.qs-animations-paused .qs-rings-stack,
+.qs-animations-paused .qs-ring {
+  animation-play-state: paused !important;
+}
+
+.qs-rings-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: #ffffff;
+  pointer-events: none;
+  overflow: hidden;
+  contain: paint;
+  isolation: isolate;
+}
+
+.qs-rings-stack {
+  --tunnel-ring-count: 20;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 1;
+  translate: -50% -50%;
+  width: 142vmax;
+  height: 142vmax;
+  aspect-ratio: 1;
+  pointer-events: none;
+  filter: hue-rotate(0deg);
+  -webkit-filter: hue-rotate(0deg);
+  animation: qs-stack-rainbow-spin 14s linear infinite;
+}
+
+@keyframes qs-stack-rainbow-spin {
+  to {
+    filter: hue-rotate(360deg);
+    -webkit-filter: hue-rotate(360deg);
+  }
+}
+
+.qs-ring {
+  --ring-i: 0;
+  --ring-max: calc(var(--tunnel-ring-count) - 1);
+  --ring-hue: calc(var(--ring-i) * 360 / var(--tunnel-ring-count));
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  transform-origin: center center;
+  box-sizing: border-box;
+  width: calc(2% + var(--ring-i) * (98% / var(--ring-max)));
+  height: calc(2% + var(--ring-i) * (98% / var(--ring-max)));
+  border-radius: 50%;
+  border-style: solid;
+  border-width: clamp(2px, 0.35vmin, 5px);
+  background: transparent;
+  opacity: 0;
+  border-color: hsl(var(--ring-hue) 88% 50%);
+  box-shadow:
+    0 0 6px hsl(var(--ring-hue) 88% 50% / 0.5),
+    0 0 16px hsl(var(--ring-hue) 88% 50% / 0.22);
+  animation: qs-tunnel 10s linear infinite;
+  animation-delay: calc(var(--ring-i) * -0.35s);
+  will-change: transform, opacity;
+}
+
+@keyframes qs-tunnel {
+  0% {
+    transform: scale(0.12);
+    opacity: 0;
+  }
+  12% {
+    transform: scale(0.22);
+    opacity: 1;
+  }
+  88% {
+    transform: scale(1.35);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.85);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qs-rings-stack {
+    animation: none;
+    filter: none;
+    -webkit-filter: none;
+  }
+
+  .qs-ring {
+    animation: none;
+    opacity: 0.45;
+    transform: scale(0.65);
+  }
+}
