@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { useIntroChrome } from "../../contexts/IntroChromeContext";
 import Button from "../../components/button/button";
 import Hero from "./Hero";
@@ -7,6 +8,7 @@ import MobileHomePage from "./MobileHomePage";
 
 /** Breakpoint móvel: abaixo de 640px (sm do Tailwind) usa o layout mobile */
 const MOBILE_MQ = "(max-width: 639px)";
+type HomeLocationState = { skipIntro?: boolean };
 
 function useIsMobile(): boolean {
   const [isMobile, setIsMobile] = useState(
@@ -24,18 +26,17 @@ function useIsMobile(): boolean {
   return isMobile;
 }
 
-function DesktopHomePage() {
+function DesktopHomePage({ skipIntro }: { skipIntro: boolean }) {
   const { setHomeBottomNavHidden } = useIntroChrome();
 
   const [heroReady, setHeroReady] = useState(false);
-  const [introFinished, setIntroFinished] = useState(false);
-  const [introLiftSignal, setIntroLiftSignal] = useState(0);
+  const [introFinished, setIntroFinished] = useState(skipIntro);
+  const [introLiftSignal, setIntroLiftSignal] = useState(skipIntro ? 1 : 0);
 
-  /** Esconde a barra ao montar (introFinished ainda é false). Nunca revela aqui —
-   *  a revelação é responsabilidade de onHeaderNavReveal no Hero (fim da animação). */
+  /** Sempre monta com a barra inferior oculta e libera apenas quando a hero manda revelar. */
   useLayoutEffect(() => {
-    if (!introFinished) setHomeBottomNavHidden(true);
-  }, [introFinished, setHomeBottomNavHidden]);
+    setHomeBottomNavHidden(true);
+  }, [setHomeBottomNavHidden]);
 
   useEffect(() => {
     return () => setHomeBottomNavHidden(false);
@@ -64,9 +65,9 @@ function DesktopHomePage() {
   );
 }
 
-function MobileHomeWrapper() {
+function MobileHomeWrapper({ skipIntro }: { skipIntro: boolean }) {
   const { setHomeBottomNavHidden } = useIntroChrome();
-  const [introFinished, setIntroFinished] = useState(false);
+  const [introFinished, setIntroFinished] = useState(skipIntro);
   const [mobileHeroFinished, setMobileHeroFinished] = useState(false);
 
   useLayoutEffect(() => {
@@ -113,6 +114,8 @@ function MobileHomeWrapper() {
 }
 
 export default function HomePage() {
+  const location = useLocation();
   const isMobile = useIsMobile();
-  return isMobile ? <MobileHomeWrapper /> : <DesktopHomePage />;
+  const skipIntro = Boolean((location.state as HomeLocationState | null)?.skipIntro);
+  return isMobile ? <MobileHomeWrapper skipIntro={skipIntro} /> : <DesktopHomePage skipIntro={skipIntro} />;
 }
