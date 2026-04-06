@@ -25,14 +25,14 @@ export default function BottomNavBar() {
       aria-hidden={!revealed}
     >
       <div className="bottom-nav__inner">
-        {NAV_ITEMS.map((item, index) => {
+        {NAV_ITEMS.map((item) => {
           return (
             <Button
               key={item.to}
               to={item.to}
               showIcon={false}
               className="bottom-nav-item"
-              conicStartDeg={180 + index * 10}
+              conicStartDeg={180}
             >
               {item.label}
             </Button>

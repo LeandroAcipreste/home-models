@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import { useIntroChrome } from "../../contexts/IntroChromeContext";
+import Button from "../../components/button/button";
 import Hero from "./Hero";
 import IntroductionVideo from "./IntroductionVideo";
 import MobileHomePage from "./MobileHomePage";
@@ -64,14 +65,51 @@ function DesktopHomePage() {
 }
 
 function MobileHomeWrapper() {
-  const { setBottomNavPermanentlyHidden } = useIntroChrome();
+  const { setHomeBottomNavHidden } = useIntroChrome();
+  const [introFinished, setIntroFinished] = useState(false);
+  const [mobileHeroFinished, setMobileHeroFinished] = useState(false);
 
   useLayoutEffect(() => {
-    setBottomNavPermanentlyHidden(true);
-    return () => setBottomNavPermanentlyHidden(false);
-  }, [setBottomNavPermanentlyHidden]);
+    // Mobile: esconder navegações até o vídeo da hero mobile terminar.
+    setHomeBottomNavHidden(!mobileHeroFinished);
+  }, [mobileHeroFinished, setHomeBottomNavHidden]);
 
-  return <MobileHomePage />;
+  useEffect(() => {
+    return () => setHomeBottomNavHidden(false);
+  }, [setHomeBottomNavHidden]);
+
+  const handleIntroFinish = useCallback(() => {
+    setIntroFinished(true);
+  }, []);
+
+  const handleMobileHeroFinish = useCallback(() => {
+    setMobileHeroFinished(true);
+  }, []);
+
+  return (
+    <div className="relative min-w-0 w-full overflow-x-clip bg-black">
+      {introFinished ? (
+        <MobileHomePage onVideoFinished={handleMobileHeroFinish} />
+      ) : (
+        <IntroductionVideo readyToReveal onFinish={handleIntroFinish} />
+      )}
+
+      <div
+        className={`pointer-events-none fixed inset-x-0 top-0 z-60 transition-all duration-800 ease-[cubic-bezier(0.33,1,0.68,1)] ${mobileHeroFinished ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"}`}
+      >
+        <div className="pointer-events-auto mx-auto flex max-w-6xl items-center justify-end gap-2 px-4 py-4 sm:px-6 sm:gap-3">
+          <Button
+            href="#cadastro"
+            showIcon={false}
+            className="cadastre-nav-btn text-xs sm:text-sm"
+          >
+            Cadastre-se
+          </Button>
+          <Button href="#login" className="text-xs sm:text-sm" />
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function HomePage() {

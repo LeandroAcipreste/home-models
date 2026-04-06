@@ -8,9 +8,17 @@
 
 .canvas-download-btn__icon {
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+  line-height: 0;
+  transform: translateY(0.5px);
   color: hsl(0, 95%, 55%);
   animation: rainbow-border-hue 10s linear infinite;
+}
+
+.canvas-download-btn__icon svg {
+  display: block;
 }
 
 .canvas-download-btn:hover {

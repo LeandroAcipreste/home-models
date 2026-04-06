@@ -67,9 +67,10 @@
   border-radius: inherit;
 }
 
-/* Mobile: mantém o comportamento já usado no botão de cadastro */
+/* Mobile: remove rotação física do cone (causa artefatos em alguns devices),
+   mantendo a animação de cor via hue-rotate. */
 @media (max-width: 639px) {
-  .cadastre-nav-btn .rainbow-border::before {
-    animation: none !important;
+  .rainbow-border::before {
+    animation: rainbow-border-hue 10s linear infinite !important;
   }
 }
