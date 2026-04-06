@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useIntroChrome } from "../../contexts/IntroChromeContext";
 import Button from "../../components/button/button";
 import Hero from "./Hero";
@@ -114,8 +114,16 @@ function MobileHomeWrapper({ skipIntro }: { skipIntro: boolean }) {
 }
 
 export default function HomePage() {
+  const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
   const skipIntro = Boolean((location.state as HomeLocationState | null)?.skipIntro);
+
+  useEffect(() => {
+    if (!skipIntro) return;
+    // Consome o estado apenas uma vez para a intro voltar em carregamentos normais.
+    navigate("/", { replace: true });
+  }, [skipIntro, navigate]);
+
   return isMobile ? <MobileHomeWrapper skipIntro={skipIntro} /> : <DesktopHomePage skipIntro={skipIntro} />;
 }

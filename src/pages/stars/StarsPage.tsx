@@ -1,11 +1,8 @@
-import { useEffect, useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useMemo, useRef } from "react";
 import gsap from "gsap";
-import type { CSSProperties } from "react";
 import "../quemSomos/QuemSomos.css";
 
 const N = 7;
-const TUNNEL_RING_COUNT = 20;
-
 const EFEITO_BASE = `${import.meta.env.BASE_URL}images/models/img-efeito-backgroung`;
 const FAN_CARD_W = 601;
 const FAN_CARD_H = 416;
@@ -32,15 +29,24 @@ function parseFanTransform(t: string): FanPos {
   return { xPercent: parseFloat(m[1]), z: parseFloat(m[2]) };
 }
 
-const FAN_POSITIONS: FanPos[] = FAN_STACK.map((s) => parseFanTransform(s.transform));
+const FAN_POSITIONS_DESKTOP: FanPos[] = FAN_STACK.map((s) => parseFanTransform(s.transform));
+const FAN_POSITIONS_MOBILE: FanPos[] = [
+  { xPercent: -42, z: 0 },
+  { xPercent: -28, z: 0 },
+  { xPercent: -14, z: 0 },
+  { xPercent: 0, z: 0 },
+  { xPercent: 14, z: 0 },
+  { xPercent: 28, z: 0 },
+  { xPercent: 42, z: 0 },
+];
 
 function zIndexForPos(p: FanPos): number {
   return Math.round(1000 + p.z + p.xPercent * 0.01);
 }
 
-function applyFanPose(el: HTMLElement, cardIndex: number, shuffleK: number) {
+function applyFanPose(el: HTMLElement, positions: FanPos[], cardIndex: number, shuffleK: number) {
   const s = (cardIndex + shuffleK + N * 10) % N;
-  const p = FAN_POSITIONS[s];
+  const p = positions[s];
 
   gsap.set(el, {
     xPercent: p.xPercent,
@@ -57,22 +63,12 @@ function applyFanPose(el: HTMLElement, cardIndex: number, shuffleK: number) {
 }
 
 export default function StarsPage() {
-  const sectionRef = useRef<HTMLElement | null>(null);
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
-
-  useEffect(() => {
-    const el = sectionRef.current;
-    if (!el || typeof IntersectionObserver === "undefined") return;
-
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        el.classList.toggle("qs-animations-paused", !entry.isIntersecting);
-      },
-      { root: null, rootMargin: "80px 0px", threshold: 0 },
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
+  const isMobile = useMemo(
+    () => typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches,
+    [],
+  );
+  const positions = isMobile ? FAN_POSITIONS_MOBILE : FAN_POSITIONS_DESKTOP;
 
   useLayoutEffect(() => {
     let cancelled = false;
@@ -99,7 +95,7 @@ export default function StarsPage() {
       fresh.forEach((el, i) => {
         const currentSlot = (i + k + N * 10) % N;
         const nextSlot = (i + k + 1 + N * 10) % N;
-        const p = FAN_POSITIONS[nextSlot];
+        const p = positions[nextSlot];
 
         gsap.set(el, { zIndex: zIndexForPos(p) });
 
@@ -135,7 +131,7 @@ export default function StarsPage() {
       }
       cardsBound = cards;
       cards.forEach((el, i) => {
-        applyFanPose(el, i, 0);
+        applyFanPose(el, positions, i, 0);
       });
       shuffleDelayCall = gsap.delayedCall(0.25, runShuffleStep);
     };
@@ -148,65 +144,39 @@ export default function StarsPage() {
       shuffleDelayCall?.kill();
       if (cardsBound.length > 0) gsap.killTweensOf(cardsBound);
     };
-  }, []);
+  }, [positions]);
 
   return (
     <main
-      ref={sectionRef}
-      className="qs-page relative isolate flex min-h-dvh w-full min-w-0 flex-col overflow-visible bg-white pb-24 sm:pb-19"
+      className="qs-page relative isolate flex min-h-dvh w-full min-w-0 flex-col overflow-visible bg-transparent pb-24 sm:pb-19"
       aria-label="Stars — Home Model"
     >
-      <div className="qs-rings-bg" aria-hidden>
-        <div
-          className="qs-rings-stack"
-          style={{ "--tunnel-ring-count": TUNNEL_RING_COUNT } as CSSProperties}
-        >
-          {Array.from({ length: TUNNEL_RING_COUNT }, (_, i) => (
-            <div
-              key={i}
-              className="qs-ring"
-              style={{ "--ring-i": i } as CSSProperties}
-            />
-          ))}
-        </div>
-      </div>
-
-      <div className="relative z-10 flex min-h-dvh w-full min-w-0 flex-1 flex-col">
-        <div className="relative z-20 flex w-full shrink-0 justify-center px-4 pb-2 pt-12 sm:pt-16 sm:px-6">
-          <h1 className="qs-title">
-            <span className="qs-title-line text-[clamp(1.75rem,6.5vw,3.75rem)] sm:text-[clamp(2rem,7.5vw,4.25rem)]">
-              Stars
-            </span>
-          </h1>
-        </div>
-
-        <div className="relative z-30 flex min-h-0 flex-1 flex-col items-center justify-center pb-8 sm:pb-12">
-          <div className="pointer-events-none flex w-full justify-center overflow-visible px-3 py-6 sm:px-4 sm:py-10">
-            <div className="qs-fan-perspective-shell">
-              <div className="qs-fan-tilt-layer">
-                <div className="qs-fan-layout">
-                  {FAN_STACK.map(({ file, alt }, i) => (
-                    <div
-                      key={`${file}-${i}`}
-                      ref={(el) => {
-                        if (el) cardsRef.current[i] = el;
-                      }}
-                      className="qs-fan-card-base rounded-[20px]"
-                    >
-                      <img
-                        src={efeitoSrc(file)}
-                        alt={alt}
-                        width={FAN_CARD_W}
-                        height={FAN_CARD_H}
-                        draggable={false}
-                        loading="eager"
-                        decoding="async"
-                        sizes="(max-width: 767px) 90vw, (max-width: 991px) 400px, 601px"
-                        className="qs-fan-card-img"
-                      />
-                    </div>
-                  ))}
-                </div>
+      <div className="relative z-30 flex min-h-dvh w-full min-w-0 flex-1 flex-col items-center justify-center pb-8 pt-10 sm:pb-12 sm:pt-12">
+        <div className="pointer-events-none flex w-full justify-center overflow-visible px-3 py-6 sm:px-4 sm:py-10">
+          <div className="qs-fan-perspective-shell">
+            <div className="qs-fan-tilt-layer">
+              <div className="qs-fan-layout">
+                {FAN_STACK.map(({ file, alt }, i) => (
+                  <div
+                    key={`${file}-${i}`}
+                    ref={(el) => {
+                      if (el) cardsRef.current[i] = el;
+                    }}
+                    className="qs-fan-card-base rounded-[20px]"
+                  >
+                    <img
+                      src={efeitoSrc(file)}
+                      alt={alt}
+                      width={FAN_CARD_W}
+                      height={FAN_CARD_H}
+                      draggable={false}
+                      loading="eager"
+                      decoding="async"
+                      sizes="(max-width: 767px) 90vw, (max-width: 991px) 400px, 601px"
+                      className="qs-fan-card-img"
+                    />
+                  </div>
+                ))}
               </div>
             </div>
           </div>
