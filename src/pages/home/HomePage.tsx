@@ -87,7 +87,7 @@ function MobileHomeWrapper() {
   }, []);
 
   return (
-    <div className="relative min-w-0 w-full overflow-x-clip bg-black">
+    <div className="relative min-w-0 w-full overflow-x-clip bg-white">
       {introFinished ? (
         <MobileHomePage onVideoFinished={handleMobileHeroFinish} />
       ) : (

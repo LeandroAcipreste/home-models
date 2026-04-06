@@ -25,6 +25,6 @@
   box-shadow: 0 0 22px -4px rgba(100, 100, 100, 0.45);
 }
 
-.canvas-download-btn:hover .rainbow-border__inner {
-  background-color: #f4f4f5;
+.canvas-download-btn:hover .rainbow-border::after {
+  background: #f4f4f5;
 }

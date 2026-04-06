@@ -1,15 +1,25 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import Hls from "hls.js";
 import introVideoMobile from "../../../video/entrance-mobile.mp4";
 import introVideoDesktop from "../../../video/video-de-entrada.mp4";
 
 /** Mobile até 639px (breakpoint `sm` do Tailwind); tablet e acima usam o vídeo desktop. */
 const INTRO_VIDEO_MOBILE_MQ = "(max-width: 639px)";
+const INTRO_STREAM_MOBILE = "/streams/intro-mobile/index.m3u8";
+const INTRO_STREAM_DESKTOP = "/streams/intro-desktop/index.m3u8";
 
-function introSrcForViewport(): string {
-  if (typeof window === "undefined") return introVideoDesktop;
+type IntroSource = {
+  stream: string;
+  fallback: string;
+};
+
+function introSourceForViewport(): IntroSource {
+  if (typeof window === "undefined") {
+    return { stream: INTRO_STREAM_DESKTOP, fallback: introVideoDesktop };
+  }
   return window.matchMedia(INTRO_VIDEO_MOBILE_MQ).matches
-    ? introVideoMobile
-    : introVideoDesktop;
+    ? { stream: INTRO_STREAM_MOBILE, fallback: introVideoMobile }
+    : { stream: INTRO_STREAM_DESKTOP, fallback: introVideoDesktop };
 }
 
 /** Fallback branco puro para matar o flash escuro inicial */
@@ -89,7 +99,9 @@ function IntroductionVideo({
 
   // Estado para matar o fundo preto: o vídeo começa invisível e só aparece quando tem imagem
   const [isVideoReady, setIsVideoReady] = useState(false);
-  const [introSrc, setIntroSrc] = useState<string>(() => introSrcForViewport());
+  const [introSource, setIntroSource] = useState<IntroSource>(() =>
+    introSourceForViewport(),
+  );
 
   const finishFiredRef = useRef(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -108,7 +120,11 @@ function IntroductionVideo({
   useEffect(() => {
     const mq = window.matchMedia(INTRO_VIDEO_MOBILE_MQ);
     const sync = () => {
-      setIntroSrc(mq.matches ? introVideoMobile : introVideoDesktop);
+      setIntroSource(
+        mq.matches
+          ? { stream: INTRO_STREAM_MOBILE, fallback: introVideoMobile }
+          : { stream: INTRO_STREAM_DESKTOP, fallback: introVideoDesktop },
+      );
     };
     sync();
     mq.addEventListener("change", sync);
@@ -117,20 +133,65 @@ function IntroductionVideo({
 
   useEffect(() => {
     setIsVideoReady(false);
-  }, [introSrc]);
+  }, [introSource]);
 
-  /** Autoplay silencioso após o URL estar definido */
+  /** Anexa stream HLS com fallback MP4 e tenta autoplay sem esperar arquivo inteiro. */
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
+
     video.defaultMuted = true;
     video.muted = true;
-    void video.play().catch((err) => {
-      console.warn("Autoplay bloqueado pelo navegador:", err);
-      /* Sem onEnded a intro nunca liberaria mesmo com a hero pronta */
-      setVideoFinished(true);
-    });
-  }, [introSrc]);
+    video.playsInline = true;
+    video.preload = "metadata";
+
+    const play = () => {
+      void video.play().catch((err) => {
+        console.warn("Autoplay bloqueado pelo navegador:", err);
+        /* Sem onEnded a intro nunca liberaria mesmo com a hero pronta */
+        setVideoFinished(true);
+      });
+    };
+
+    let hls: Hls | null = null;
+
+    if (video.canPlayType("application/vnd.apple.mpegurl")) {
+      video.src = introSource.stream;
+      video.load();
+      play();
+      return () => {
+        video.removeAttribute("src");
+        video.load();
+      };
+    }
+
+    if (Hls.isSupported()) {
+      hls = new Hls({
+        enableWorker: true,
+        lowLatencyMode: true,
+      });
+      hls.loadSource(introSource.stream);
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MANIFEST_PARSED, () => play());
+      hls.on(Hls.Events.ERROR, (_e, data) => {
+        if (!data.fatal) return;
+        hls?.destroy();
+        hls = null;
+        video.src = introSource.fallback;
+        video.load();
+        play();
+      });
+      return () => hls?.destroy();
+    }
+
+    video.src = introSource.fallback;
+    video.load();
+    play();
+    return () => {
+      video.removeAttribute("src");
+      video.load();
+    };
+  }, [introSource]);
 
   const applyBackgroundFromVideo = useCallback(() => {
     const el = videoRef.current;
@@ -182,15 +243,14 @@ function IntroductionVideo({
         onTransitionEnd={handleLiftPanelTransitionEnd}
       >
         <video
-          key={introSrc}
+          key={introSource.stream}
           ref={videoRef}
           className={`absolute inset-0 z-0 h-full w-full min-h-0 object-cover transition-opacity duration-300 ${isVideoReady ? "opacity-100" : "opacity-0"
             }`}
-          src={introSrc}
           autoPlay
           muted
           playsInline
-          preload="auto"
+          preload="metadata"
           onLoadedData={() => {
             setIsVideoReady(true);
             applyBackgroundFromVideo();

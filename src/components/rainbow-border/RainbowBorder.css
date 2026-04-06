@@ -13,6 +13,15 @@
   }
 }
 
+@keyframes rainbow-border-mobile-flow {
+  from {
+    background-position: 0% 50%;
+  }
+  to {
+    background-position: 200% 50%;
+  }
+}
+
 .rainbow-border {
   --rb-radius: 12px;
   --rb-border: 2px;
@@ -67,10 +76,25 @@
   border-radius: inherit;
 }
 
-/* Mobile: remove rotação física do cone (causa artefatos em alguns devices),
-   mantendo a animação de cor via hue-rotate. */
+/* Mobile: fallback sem emenda visível para evitar "falha" em alguns devices. */
 @media (max-width: 639px) {
   .rainbow-border::before {
-    animation: rainbow-border-hue 10s linear infinite !important;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      hsl(0, 95%, 56%),
+      hsl(45, 95%, 56%),
+      hsl(90, 95%, 56%),
+      hsl(135, 95%, 56%),
+      hsl(180, 95%, 56%),
+      hsl(225, 95%, 56%),
+      hsl(270, 95%, 56%),
+      hsl(315, 95%, 56%),
+      hsl(0, 95%, 56%)
+    );
+    background-size: 220% 100%;
+    animation:
+      rainbow-border-mobile-flow 3.6s linear infinite,
+      rainbow-border-hue 10s linear infinite !important;
   }
 }
