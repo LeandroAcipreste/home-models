@@ -105,6 +105,11 @@ function IntroductionVideo({
 
   const finishFiredRef = useRef(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const isVideoReadyRef = useRef(false);
+
+  useEffect(() => {
+    isVideoReadyRef.current = isVideoReady;
+  }, [isVideoReady]);
 
   /** Último recurso: remove o overlay se algo travar a sequência normal */
   useEffect(() => {
@@ -167,12 +172,39 @@ function IntroductionVideo({
     };
 
     let hls: Hls | null = null;
+    let fallbackTimer: number | null = null;
+    let usingFallback = false;
+
+    const clearFallbackTimer = () => {
+      if (fallbackTimer == null) return;
+      window.clearTimeout(fallbackTimer);
+      fallbackTimer = null;
+    };
+
+    const switchToFallback = () => {
+      if (usingFallback) return;
+      usingFallback = true;
+      clearFallbackTimer();
+      hls?.destroy();
+      hls = null;
+      video.src = introSource.fallback;
+      video.load();
+      play();
+    };
+
+    // Alguns navegadores/dispositivos falham silenciosamente no HLS.
+    fallbackTimer = window.setTimeout(() => {
+      if (!isVideoReadyRef.current) {
+        switchToFallback();
+      }
+    }, 6000);
 
     if (video.canPlayType("application/vnd.apple.mpegurl")) {
       video.src = introSource.stream;
       video.load();
       play();
       return () => {
+        clearFallbackTimer();
         window.removeEventListener("pointerdown", playOnInteraction);
         window.removeEventListener("keydown", playOnInteraction);
         video.removeAttribute("src");
@@ -190,13 +222,10 @@ function IntroductionVideo({
       hls.on(Hls.Events.MANIFEST_PARSED, () => play());
       hls.on(Hls.Events.ERROR, (_e, data) => {
         if (!data.fatal) return;
-        hls?.destroy();
-        hls = null;
-        video.src = introSource.fallback;
-        video.load();
-        play();
+        switchToFallback();
       });
       return () => {
+        clearFallbackTimer();
         window.removeEventListener("pointerdown", playOnInteraction);
         window.removeEventListener("keydown", playOnInteraction);
         hls?.destroy();
@@ -207,6 +236,7 @@ function IntroductionVideo({
     video.load();
     play();
     return () => {
+      clearFallbackTimer();
       window.removeEventListener("pointerdown", playOnInteraction);
       window.removeEventListener("keydown", playOnInteraction);
       video.removeAttribute("src");

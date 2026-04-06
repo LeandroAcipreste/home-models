@@ -25,7 +25,7 @@ type ButtonProps = Omit<
 function LoginIcon() {
   return (
     <span className="canvas-download-btn__icon" aria-hidden>
-      <LogIn size={18} strokeWidth={2.25} />
+      <LogIn size="1em" strokeWidth={2.25} />
     </span>
   );
 }
@@ -46,7 +46,7 @@ export default function Button({
 
   const inner = (
     <RainbowBorder
-      className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold leading-tight"
+      className="flex items-center gap-2 px-5 py-2.5 text-inherit font-semibold leading-none"
       conicStartDeg={conicStartDeg}
     >
       {showIcon ? <LoginIcon /> : null}

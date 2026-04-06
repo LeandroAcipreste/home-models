@@ -11,14 +11,15 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  line-height: 0;
-  transform: translateY(0.5px);
+  line-height: 1;
   color: hsl(0, 95%, 55%);
   animation: rainbow-border-hue 10s linear infinite;
 }
 
 .canvas-download-btn__icon svg {
   display: block;
+  width: 1em;
+  height: 1em;
 }
 
 .canvas-download-btn:hover {
