@@ -48,13 +48,14 @@ function Hero({
     navItems.forEach((el) => el.classList.remove("opacity-0"));
     gsap.fromTo(
       navItems,
-      { y: 20, opacity: 0 },
+      { y: 32, opacity: 0 },
       {
         y: 0,
         opacity: 1,
-        duration: 0.8,
-        ease: "power3.out",
-        stagger: 0.15,
+        duration: 1.6,
+        ease: "power2.out",
+        stagger: 0.28,
+        delay: 0.4,
         clearProps: "all",
       },
     );

@@ -7,10 +7,10 @@
   padding-bottom: env(safe-area-inset-bottom, 0px);
   pointer-events: none;
   opacity: 0;
-  transform: translateY(22px);
+  transform: translateY(30px);
   transition:
-    opacity 0.8s cubic-bezier(0.33, 1, 0.68, 1),
-    transform 0.8s cubic-bezier(0.33, 1, 0.68, 1);
+    opacity 1.5s cubic-bezier(0.33, 1, 0.68, 1) 0.9s,
+    transform 1.5s cubic-bezier(0.33, 1, 0.68, 1) 0.9s;
 }
 
 .bottom-nav.bottom-nav--revealed {
@@ -58,5 +58,6 @@
 @media (prefers-reduced-motion: reduce) {
   .bottom-nav {
     transition: none;
+    transition-delay: 0s;
   }
 }
