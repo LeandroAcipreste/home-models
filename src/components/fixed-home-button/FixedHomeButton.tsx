@@ -1,15 +1,13 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { useIntroChrome } from "../../contexts/IntroChromeContext";
 import RainbowBorder from "../rainbow-border/RainbowBorder";
 import logoHomeModel from "../navigate-bar/logo-mode-models.jpg";
 
 export default function FixedHomeButton() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { homeBottomNavHidden } = useIntroChrome();
 
   const isHome = location.pathname === "/";
-  const shouldShow = !isHome || !homeBottomNavHidden;
+  const shouldShow = !isHome;
 
   const handleGoHome = () => {
     navigate("/", { state: { skipIntro: true } });

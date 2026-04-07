@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useIntroChrome } from "../../contexts/IntroChromeContext";
+import { useLoginModal } from "../../contexts/LoginModalContext";
 import Button from "../../components/button/button";
 import Hero from "./Hero";
 import IntroductionVideo from "./IntroductionVideo";
@@ -67,6 +68,7 @@ function DesktopHomePage({ skipIntro }: { skipIntro: boolean }) {
 
 function MobileHomeWrapper({ skipIntro }: { skipIntro: boolean }) {
   const { setHomeBottomNavHidden } = useIntroChrome();
+  const { openLoginModal } = useLoginModal();
   const [introFinished, setIntroFinished] = useState(skipIntro);
   const [mobileHeroFinished, setMobileHeroFinished] = useState(false);
 
@@ -100,13 +102,20 @@ function MobileHomeWrapper({ skipIntro }: { skipIntro: boolean }) {
       >
         <div className="pointer-events-auto mx-auto flex max-w-6xl items-center justify-end gap-2 px-4 py-4 sm:px-6 sm:gap-3">
           <Button
-            href="#cadastro"
+            to="/cadastro"
             showIcon={false}
             className="cadastre-nav-btn text-xs sm:text-sm"
           >
             Cadastre-se
           </Button>
-          <Button href="#login" className="text-xs sm:text-sm" />
+          <Button
+            href="#login"
+            onClick={(event) => {
+              event.preventDefault();
+              openLoginModal();
+            }}
+            className="text-xs sm:text-sm"
+          />
         </div>
       </div>
     </div>

@@ -1,0 +1,182 @@
+.login-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgb(9 9 11 / 0.55);
+  backdrop-filter: blur(6px);
+}
+
+.login-modal-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  width: min(100%, 460px);
+  border-radius: 18px;
+  border: 2px solid transparent;
+  background:
+    linear-gradient(rgb(255 255 255 / 0.94), rgb(255 255 255 / 0.94)) padding-box,
+    linear-gradient(
+      90deg,
+      #ef4444,
+      #f97316,
+      #eab308,
+      #22c55e,
+      #06b6d4,
+      #3b82f6,
+      #8b5cf6,
+      #ec4899,
+      #ef4444
+    ) border-box;
+  box-shadow:
+    0 14px 42px rgb(59 130 246 / 0.14),
+    0 22px 60px rgb(236 72 153 / 0.12);
+  padding: 1.1rem;
+  font-family:
+    "Montserrat",
+    "Avenir Next",
+    "Nunito Sans",
+    "Segoe UI",
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+}
+
+.login-modal-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: var(--login-brand-bg);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: min(320px, 78%);
+  opacity: 0.08;
+  pointer-events: none;
+}
+
+.login-modal-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.login-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.8rem;
+}
+
+.login-modal-title {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.login-modal-close {
+  border: 0;
+  background: transparent;
+  color: #4b5563;
+  font-size: 1.8rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.login-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.login-modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.login-modal-field > span {
+  color: #1f2937;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.login-modal-field > input {
+  width: 100%;
+  min-height: 42px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  color: #111827;
+  padding: 0.62rem 0.72rem;
+  font: inherit;
+  outline: none;
+}
+
+.login-modal-field > input:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgb(124 58 237 / 0.15);
+}
+
+.login-modal-submit-wrap {
+  display: inline-flex;
+  width: fit-content;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+
+.login-modal-submit {
+  padding: 0.65rem 1.1rem;
+}
+
+.login-modal-message {
+  margin: 0;
+  color: #047857;
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+@media (max-width: 639px) {
+  .login-modal-overlay {
+    align-items: flex-end;
+    padding: 0.65rem;
+  }
+
+  .login-modal-card {
+    width: 100%;
+    border-radius: 16px;
+    padding: 0.9rem;
+  }
+
+  .login-modal-card::before {
+    background-size: min(220px, 70%);
+  }
+
+  .login-modal-title {
+    font-size: 1.1rem;
+  }
+
+  .login-modal-submit-wrap {
+    width: 100%;
+  }
+
+  .login-modal-submit-wrap .rainbow-border {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  .login-modal-card {
+    width: min(100%, 500px);
+    padding: 1rem;
+  }
+}

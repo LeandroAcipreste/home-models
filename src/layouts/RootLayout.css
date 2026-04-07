@@ -1,0 +1,22 @@
+.route-transition-enter {
+  animation: route-slide-in 520ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform, opacity;
+}
+
+@keyframes route-slide-in {
+  from {
+    transform: translate3d(56px, 0, 0);
+    opacity: 0.01;
+  }
+
+  to {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-transition-enter {
+    animation: none;
+  }
+}

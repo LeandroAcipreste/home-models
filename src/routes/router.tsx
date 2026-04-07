@@ -4,6 +4,7 @@ import HomePage from "../pages/home/HomePage";
 import QuemSomos from "../pages/quemSomos/QuemSomos";
 import StarsPage from "../pages/stars/StarsPage";
 import SectionPage from "../pages/section/SectionPage";
+import CadastroPage from "../pages/cadastro/CadastroPage";
 
 export function createAppRouter() {
   return createBrowserRouter([
@@ -17,6 +18,7 @@ export function createAppRouter() {
         { path: "masculino", element: <SectionPage title="Masculino" /> },
         { path: "stars", element: <StarsPage /> },
         { path: "destaques", element: <SectionPage title="Destaques" /> },
+        { path: "cadastro", element: <CadastroPage /> },
         {
           path: "fashion-school",
           element: <SectionPage title="Fashion School" />,

@@ -2,8 +2,11 @@ import { Link } from "react-router-dom";
 import Button from "../button/button";
 import RainbowBorder from "../rainbow-border/RainbowBorder";
 import logoHomeModel from "./logo-mode-models.jpg";
+import { useLoginModal } from "../../contexts/LoginModalContext";
 
 function NavigateBar() {
+  const { openLoginModal } = useLoginModal();
+
   return (
     <header
       className="pointer-events-none absolute inset-x-0 top-0 z-50 bg-transparent"
@@ -32,7 +35,7 @@ function NavigateBar() {
           aria-label="Conta"
         >
           <Button
-            href="#cadastro"
+            to="/cadastro"
             showIcon={false}
             className="cadastre-nav-btn nav-reveal-item opacity-0 text-xs sm:text-sm"
           >
@@ -40,6 +43,10 @@ function NavigateBar() {
           </Button>
           <Button
             href="#login"
+            onClick={(event) => {
+              event.preventDefault();
+              openLoginModal();
+            }}
             className="nav-reveal-item opacity-0 text-xs sm:text-sm"
           />
         </nav>

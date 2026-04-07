@@ -1,4 +1,5 @@
 ﻿import Button from "../button/button";
+import { useLocation } from "react-router-dom";
 import { useIntroChrome } from "../../contexts/IntroChromeContext";
 import "./BottomNavBar.css";
 
@@ -12,8 +13,10 @@ const NAV_ITEMS = [
 ] as const;
 
 export default function BottomNavBar() {
+  const location = useLocation();
   const { homeBottomNavHidden, bottomNavPermanentlyHidden } = useIntroChrome();
 
+  if (location.pathname === "/cadastro") return null;
   if (bottomNavPermanentlyHidden) return null;
 
   const revealed = !homeBottomNavHidden;
