@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import gsap from "gsap";
-import "../quemSomos/QuemSomos.css";
+import "./stars.css";
 
 const N = 7;
 const EFEITO_BASE = `${import.meta.env.BASE_URL}images/models/img-efeito-backgroung`;
@@ -41,13 +41,13 @@ function parseFanTransform(t: string): FanPos {
 
 const FAN_POSITIONS_DESKTOP: FanPos[] = FAN_STACK_DESKTOP.map((s) => parseFanTransform(s.transform));
 const FAN_POSITIONS_MOBILE: FanPos[] = [
-  { xPercent: -42, z: 0 },
-  { xPercent: -28, z: 0 },
-  { xPercent: -14, z: 0 },
+  { xPercent: -45, z: -550 },
+  { xPercent: -30, z: -350 },
+  { xPercent: -15, z: -150 },
   { xPercent: 0, z: 0 },
-  { xPercent: 14, z: 0 },
-  { xPercent: 28, z: 0 },
-  { xPercent: 42, z: 0 },
+  { xPercent: 15, z: -150 },
+  { xPercent: 30, z: -350 },
+  { xPercent: 45, z: -550 },
 ];
 
 function zIndexForPos(p: FanPos): number {
@@ -59,10 +59,13 @@ function applyFanPose(el: HTMLElement, positions: FanPos[], cardIndex: number, s
   const p = positions[s];
 
   gsap.set(el, {
-    xPercent: p.xPercent,
-    y: 0,
-    z: p.z,
+    left: "50%",
+    top: "50%",
     x: 0,
+    y: 0,
+    xPercent: p.xPercent - 50,
+    yPercent: -50,
+    z: p.z,
     rotation: 0,
     transformOrigin: "50% 50%",
     force3D: true,
@@ -74,9 +77,12 @@ function applyFanPose(el: HTMLElement, positions: FanPos[], cardIndex: number, s
 
 export default function StarsPage() {
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const fanLayoutRef = useRef<HTMLDivElement | null>(null);
+  const shuffleKRef = useRef(0);
   const [isMobile, setIsMobile] = useState(
     () => typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches,
   );
+  const [stackReady, setStackReady] = useState(false);
   const fanStack = isMobile ? FAN_STACK_MOBILE : FAN_STACK_DESKTOP;
   const positions = isMobile ? FAN_POSITIONS_MOBILE : FAN_POSITIONS_DESKTOP;
 
@@ -89,80 +95,65 @@ export default function StarsPage() {
   }, []);
 
   useLayoutEffect(() => {
-    let cancelled = false;
-    let shuffleDelayCall: gsap.core.Tween | null = null;
-    let rafId = 0;
-    let cardsBound: HTMLDivElement[] = [];
+    if (!stackReady) return;
+    const cards = cardsRef.current.filter((n): n is HTMLDivElement => n != null);
+    if (cards.length !== N) return;
 
-    const runShuffleStep = () => {
-      if (cancelled) return;
-      const fresh = cardsRef.current.filter((n): n is HTMLDivElement => n != null);
-      if (fresh.length !== N) return;
-      const k = shuffleK;
+    const ctx = gsap.context(() => {
+      let shuffleDelayCall: gsap.core.Tween | null = null;
+      const currentK = shuffleKRef.current;
 
-      const tl = gsap.timeline({
-        defaults: { force3D: true },
-        onComplete: () => {
-          shuffleK = (shuffleK + 1) % N;
-          if (!cancelled) {
-            shuffleDelayCall = gsap.delayedCall(1.05, runShuffleStep);
-          }
-        },
+      cards.forEach((el, i) => {
+        applyFanPose(el, positions, i, currentK);
       });
 
-      fresh.forEach((el, i) => {
-        const currentSlot = (i + k + N * 10) % N;
-        const nextSlot = (i + k + 1 + N * 10) % N;
-        const p = positions[nextSlot];
+      const runShuffleStep = () => {
+        shuffleKRef.current = (shuffleKRef.current + 1) % N;
+        const k = shuffleKRef.current;
+        const tl = gsap.timeline({
+          defaults: {
+            force3D: true,
+            ease: "power2.inOut",
+            duration: 0.8,
+          },
+          onComplete: () => {
+            shuffleDelayCall = gsap.delayedCall(1.2, runShuffleStep);
+          },
+        });
 
-        gsap.set(el, { zIndex: zIndexForPos(p) });
-
-        if (currentSlot === 5 && nextSlot === 6) {
-          tl.to(el, { xPercent: p.xPercent, z: p.z, duration: 0.75, ease: "power2.inOut" }, 0);
-          tl.to(el, { autoAlpha: 0.15, duration: 0.35, yoyo: true, repeat: 1 }, 0);
-        } else {
+        cards.forEach((el, i) => {
+          const s = (i + k + N * 10) % N;
+          const p = positions[s];
           tl.to(
             el,
             {
-              xPercent: p.xPercent,
-              z: p.z,
+              left: "50%",
+              top: "50%",
               x: 0,
-              rotation: 0,
+              y: 0,
+              xPercent: p.xPercent - 50,
+              yPercent: -50,
+              z: p.z,
               autoAlpha: 1,
-              duration: 0.75,
-              ease: "power2.inOut",
+              onStart: () => {
+                gsap.set(el, { zIndex: zIndexForPos(p) });
+              },
             },
             0,
           );
-        }
-      });
-    };
+        });
+      };
 
-    let shuffleK = 0;
+      shuffleDelayCall = gsap.delayedCall(1.0, runShuffleStep);
 
-    const tryMount = () => {
-      if (cancelled) return;
-      const cards = cardsRef.current.filter((n): n is HTMLDivElement => n != null);
-      if (cards.length !== N) {
-        rafId = requestAnimationFrame(tryMount);
-        return;
-      }
-      cardsBound = cards;
-      cards.forEach((el, i) => {
-        applyFanPose(el, positions, i, 0);
-      });
-      shuffleDelayCall = gsap.delayedCall(0.08, runShuffleStep);
-    };
+      return () => {
+        shuffleDelayCall?.kill();
+        gsap.killTweensOf(cards);
+      };
+    }, fanLayoutRef);
 
-    tryMount();
-
-    return () => {
-      cancelled = true;
-      cancelAnimationFrame(rafId);
-      shuffleDelayCall?.kill();
-      if (cardsBound.length > 0) gsap.killTweensOf(cardsBound);
-    };
-  }, [positions]);
+    return () => ctx.revert();
+  }, [positions, stackReady]);
 
   return (
     <main
@@ -173,7 +164,7 @@ export default function StarsPage() {
         <div className="pointer-events-none flex w-full justify-center overflow-visible px-3 py-6 sm:px-4 sm:py-10">
           <div className="qs-fan-perspective-shell">
             <div className="qs-fan-tilt-layer">
-              <div className="qs-fan-layout">
+              <div ref={fanLayoutRef} className="qs-fan-layout">
                 {fanStack.map(({ file, alt }, i) => (
                   <div
                     key={`${file}-${i}`}
@@ -192,10 +183,14 @@ export default function StarsPage() {
                       decoding="async"
                       sizes="(max-width: 767px) 90vw, (max-width: 991px) 400px, 601px"
                       className="qs-fan-card-img"
+                      onLoad={() => {
+                        if (i === 3) setStackReady(true);
+                      }}
                       onError={(event) => {
                         const img = event.currentTarget;
                         if (img.src.includes("13.jpg")) return;
                         img.src = efeitoSrc("13.jpg");
+                        if (i === 3) setStackReady(true);
                       }}
                     />
                   </div>

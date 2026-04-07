@@ -1,0 +1,54 @@
+.qs-fan-perspective-shell {
+  perspective: 1500px;
+  perspective-origin: center center;
+  transform-style: preserve-3d;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.qs-fan-tilt-layer {
+  transform-style: preserve-3d;
+  transform: rotateX(1deg);
+}
+
+.qs-fan-layout {
+  position: relative;
+  width: 601px;
+  height: 416px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-style: preserve-3d;
+  margin: 0 auto;
+}
+
+@media (max-width: 767px) {
+  .qs-fan-layout {
+    width: 320px;
+    height: 240px;
+  }
+}
+
+.qs-fan-card-base {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  transform: translate(-50%, -50%);
+  overflow: hidden;
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  contain: layout paint;
+  box-shadow: 0 16px 40px rgb(0 0 0 / 0.12), 0 4px 12px rgb(0 0 0 / 0.06);
+}
+
+.qs-fan-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}

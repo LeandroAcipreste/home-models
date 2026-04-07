@@ -36,8 +36,13 @@ function DesktopHomePage({ skipIntro }: { skipIntro: boolean }) {
 
   /** Sempre monta com a barra inferior oculta e libera apenas quando a hero manda revelar. */
   useLayoutEffect(() => {
+    if (skipIntro) {
+      // Retorno para a home (via botão fixo): não esconde a bottom nav.
+      setHomeBottomNavHidden(false);
+      return;
+    }
     setHomeBottomNavHidden(true);
-  }, [setHomeBottomNavHidden]);
+  }, [setHomeBottomNavHidden, skipIntro]);
 
   useEffect(() => {
     return () => setHomeBottomNavHidden(false);

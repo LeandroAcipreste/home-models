@@ -47,5 +47,7 @@ arte-home -fashion.jpeg
 Home Model 2025.pdf
 logo-mode-models.jpeg
 
-# Pôster retirado da Hero; pasta só faz sentido se voltar a usar no código
-public/images/models
+# Modelos: mantém ignorado por padrão, mas versiona o efeito usado em produção
+public/images/models/*
+!public/images/models/img-efeito-backgroung/
+!public/images/models/img-efeito-backgroung/**
