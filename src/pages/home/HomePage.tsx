@@ -54,6 +54,7 @@ function DesktopHomePage({ skipIntro }: { skipIntro: boolean }) {
         onReady={handleHeroReady}
         introLiftSignal={introLiftSignal}
         onHeaderNavReveal={handleHeaderNavReveal}
+        skipIntro={skipIntro}
       />
       {!introFinished ? (
         <IntroductionVideo

@@ -1,440 +1,187 @@
-import { useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import Hls from "hls.js";
 import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
 import NavigateBar from "../../components/navigate-bar/navigate-bar";
+import heroVideoFallback from "../../../video/Crystal_shards_assemble_202604030618.mp4";
 
-gsap.registerPlugin(useGSAP);
-
-type HeroManifest = {
-  frameCount: number;
-};
+const HERO_STREAM = "/streams/hero-desktop/index.m3u8";
+const HERO_FINAL_FRAME = "/images/backgrounds/frame_00192.webp";
 
 export type HeroProps = {
   onReady?: () => void;
   introLiftSignal?: number;
-  /** Chamado no mesmo instante em que os botões do header entram (após a construção ou fallback) */
   onHeaderNavReveal?: () => void;
+  /** Quando true, pula a animação de vídeo e exibe o frame final diretamente. */
+  skipIntro?: boolean;
 };
 
-function frameUrl(index: number) {
-  const n = index + 1;
-  return `/images/video/frame_${String(n).padStart(5, "0")}.webp`;
-}
+function Hero({
+  onReady,
+  introLiftSignal = 0,
+  onHeaderNavReveal,
+  skipIntro = false,
+}: HeroProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
-function createPlaceholderImage(): HTMLImageElement {
-  const img = new Image();
-  img.src =
-    "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
-  return img;
-}
-
-function loadSingleFrame(index: number): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.decoding = "async";
-
-    img.onload = () => {
-      img
-        .decode()
-        .then(() => resolve(img))
-        .catch(() => resolve(img));
-    };
-
-    img.onerror = () =>
-      reject(new Error(`Falha ao carregar ${frameUrl(index)}`));
-    img.src = frameUrl(index);
-  });
-}
-
-async function preloadFramesResilient(count: number): Promise<HTMLImageElement[]> {
-  const settled = await Promise.allSettled(
-    Array.from({ length: count }, (_, i) => loadSingleFrame(i)),
-  );
-
-  const images: HTMLImageElement[] = [];
-  let lastGood: HTMLImageElement | null = null;
-  const placeholder = createPlaceholderImage();
-
-  for (let i = 0; i < count; i++) {
-    const r = settled[i];
-    if (r.status === "fulfilled") {
-      const img = r.value;
-      if (img.naturalWidth > 0) {
-        lastGood = img;
-        images.push(img);
-        continue;
-      }
-    }
-    if (lastGood) images.push(lastGood);
-    else images.push(placeholder);
-  }
-
-  return images;
-}
-
-function drawImageCover(
-  ctx: CanvasRenderingContext2D,
-  img: HTMLImageElement,
-  cw: number,
-  ch: number,
-) {
-  const iw = img.naturalWidth;
-  const ih = img.naturalHeight;
-  if (!iw || !ih) return;
-
-  const scale = Math.max(cw / iw, ch / ih);
-  const dw = iw * scale;
-  const dh = ih * scale;
-  const dx = (cw - dw) / 2;
-  const dy = (ch - dh) / 2;
-
-  ctx.clearRect(0, 0, cw, ch);
-  ctx.drawImage(img, dx, dy, dw, dh);
-}
-
-const CONSTRUCTION_DURATION_SEC = 5.5;
-
-/** Fluxo: animação de construção 0→N−1; depois o último frame permanece (sem scrub no scroll). */
-function Hero({ onReady, introLiftSignal = 0, onHeaderNavReveal }: HeroProps) {
-  const sectionRef = useRef<HTMLElement | null>(null);
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const onReadyRef = useRef(onReady);
+  onReadyRef.current = onReady;
   const onHeaderNavRevealRef = useRef(onHeaderNavReveal);
   onHeaderNavRevealRef.current = onHeaderNavReveal;
 
-  const heroImagesRef = useRef<HTMLImageElement[]>([]);
-  const heroFrameCountRef = useRef(0);
-  const scrollStateRef = useRef({ frame: 0 });
+  const lastLiftSignalRef = useRef(0);
+  const navRevealedRef = useRef(false);
+  const hlsRef = useRef<Hls | null>(null);
 
-  const prefersReducedRef = useRef(false);
-  const introStateRef = useRef({ frame: 0 });
-  const introActiveRef = useRef(false);
-  const pendingIntroConstructionRef = useRef(false);
-  const constructionCompleteRef = useRef(false);
+  const [videoPlaying, setVideoPlaying] = useState(false);
 
-  const runIntroConstructionRef = useRef<(() => void) | null>(null);
-  const lastDispatchedLiftRef = useRef(0);
+  /** Anima as entradas dos itens de nav e sinaliza o contexto pai. */
+  const revealNav = useCallback(() => {
+    if (navRevealedRef.current) return;
+    navRevealedRef.current = true;
+    onHeaderNavRevealRef.current?.();
 
-  const dimensionsRef = useRef({ w: 0, h: 0 });
+    const navRoot = containerRef.current;
+    const navItems = navRoot?.querySelectorAll<Element>(".nav-reveal-item");
+    if (!navItems?.length) return;
 
-  useGSAP(
-    (_ctx, contextSafe) => {
-      // CORREÇÃO 1: Fallback seguro caso o contextSafe venha undefined da lib do GSAP
-      const wrap = contextSafe || ((fn: Function) => fn as any);
+    navItems.forEach((el) => el.classList.remove("opacity-0"));
+    gsap.fromTo(
+      navItems,
+      { y: 20, opacity: 0 },
+      {
+        y: 0,
+        opacity: 1,
+        duration: 0.8,
+        ease: "power3.out",
+        stagger: 0.15,
+        clearProps: "all",
+      },
+    );
+  }, []);
 
-      prefersReducedRef.current = false;
+  /* ── Sinaliza a HomePage que a Hero está pronta (sem precisar baixar frames) ── */
+  useEffect(() => {
+    onReadyRef.current?.();
+  }, []);
 
-      const section = sectionRef.current;
-      const container = containerRef.current;
-      const canvasEl = canvasRef.current;
-      if (!section || !container || !canvasEl) return;
+  /* ── Se saltou a intro, revela a nav imediatamente ── */
+  useEffect(() => {
+    if (!skipIntro) return;
+    revealNav();
+  }, [skipIntro, revealNav]);
 
-      let cancelled = false;
-      let heroReadyNotified = false;
-      let lastCanvasDraw: { idx: number; tw: number; th: number } | null = null;
+  /* ── Configura HLS/MP4 enquanto o vídeo de abertura toca (preload silencioso) ── */
+  useEffect(() => {
+    if (skipIntro) return;
+    const video = videoRef.current;
+    if (!video) return;
 
-      // CORREÇÃO 2: Removido o wrap() daqui! É uma função React pura, o GSAP não deve interceptar.
-      const notifyHeroReady = () => {
-        if (cancelled || heroReadyNotified) return;
-        heroReadyNotified = true;
-        console.log("🟢 [Hero] Sinal de READY enviado para a HomePage!");
-        onReady?.();
-      };
+    video.muted = true;
+    video.playsInline = true;
+    video.preload = "auto";
 
-      const drawFrame = wrap(() => {
-        const containerEl = containerRef.current;
-        const canvas = canvasRef.current;
-        if (!containerEl || !canvas) return;
+    let fallbackTimer: number | null = null;
+    let usingFallback = false;
 
-        const images = heroImagesRef.current;
-        const frameCount = heroFrameCountRef.current;
-        if (!images.length || !frameCount) return;
+    const clearTimer = () => {
+      if (fallbackTimer != null) {
+        window.clearTimeout(fallbackTimer);
+        fallbackTimer = null;
+      }
+    };
 
-        let idx: number;
-        if (introActiveRef.current) {
-          idx = Math.max(
-            0,
-            Math.min(
-              images.length - 1,
-              Math.round(introStateRef.current.frame),
-            ),
-          );
-        } else if (
-          !constructionCompleteRef.current &&
-          !prefersReducedRef.current
-        ) {
-          idx = 0;
-        } else {
-          idx = Math.max(
-            0,
-            Math.min(
-              images.length - 1,
-              Math.round(scrollStateRef.current.frame),
-            ),
-          );
-        }
+    const switchToFallback = () => {
+      if (usingFallback) return;
+      usingFallback = true;
+      clearTimer();
+      hlsRef.current?.destroy();
+      hlsRef.current = null;
+      video.src = heroVideoFallback;
+      video.load();
+    };
 
-        const img = images[idx];
-        if (!img.complete) return;
+    fallbackTimer = window.setTimeout(() => switchToFallback(), 6000);
 
-        let { w, h } = dimensionsRef.current;
-        if (w <= 0 || h <= 0) {
-          const rect = containerEl.getBoundingClientRect();
-          w = rect.width;
-          h = rect.height;
-          dimensionsRef.current = { w, h };
-        }
-        if (w <= 0 || h <= 0) return;
-
-        const ctx = canvas.getContext("2d");
-        if (!ctx) return;
-
-        const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-        const targetW = Math.floor(w * dpr);
-        const targetH = Math.floor(h * dpr);
-
-        if (canvas.width !== targetW || canvas.height !== targetH) {
-          canvas.width = targetW;
-          canvas.height = targetH;
-          canvas.style.width = `${w}px`;
-          canvas.style.height = `${h}px`;
-          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        }
-
-        if (
-          lastCanvasDraw &&
-          lastCanvasDraw.idx === idx &&
-          lastCanvasDraw.tw === targetW &&
-          lastCanvasDraw.th === targetH
-        ) {
-          return;
-        }
-
-        drawImageCover(ctx, img, w, h);
-        lastCanvasDraw = { idx, tw: targetW, th: targetH };
+    if (video.canPlayType("application/vnd.apple.mpegurl")) {
+      clearTimer();
+      video.src = HERO_STREAM;
+      video.load();
+    } else if (Hls.isSupported()) {
+      const hls = new Hls({ enableWorker: true, lowLatencyMode: true });
+      hlsRef.current = hls;
+      hls.loadSource(HERO_STREAM);
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MANIFEST_PARSED, () => clearTimer());
+      hls.on(Hls.Events.ERROR, (_e, data) => {
+        if (data.fatal) switchToFallback();
       });
+    } else {
+      clearTimer();
+      video.src = heroVideoFallback;
+      video.load();
+    }
 
-      const lockFrameToLast = wrap(() => {
-        const fc = heroFrameCountRef.current;
-        if (!fc) return;
-        gsap.set(scrollStateRef.current, { frame: fc - 1 });
-        const c = canvasRef.current;
-        if (c) gsap.set(c, { opacity: 1 });
-        drawFrame();
-      });
+    return () => {
+      clearTimer();
+      hlsRef.current?.destroy();
+      hlsRef.current = null;
+      video.removeAttribute("src");
+      video.load();
+    };
+  }, [skipIntro]);
 
-      const runIntroConstruction = wrap(() => {
-        if (cancelled) return;
+  /* ── Quando o sinal de lift chega, dá play no vídeo da hero ── */
+  useEffect(() => {
+    if (skipIntro) return;
+    if (introLiftSignal <= 0) return;
+    if (introLiftSignal === lastLiftSignalRef.current) return;
+    lastLiftSignalRef.current = introLiftSignal;
 
-        const fc = heroFrameCountRef.current;
-        if (!fc) {
-          pendingIntroConstructionRef.current = true;
-          onHeaderNavRevealRef.current?.();
-          return;
-        }
-
-        pendingIntroConstructionRef.current = false;
-
-        if (prefersReducedRef.current) {
-          introActiveRef.current = false;
-          introStateRef.current = { frame: Math.max(0, fc - 1) };
-          constructionCompleteRef.current = true;
-          scrollStateRef.current.frame = Math.max(0, fc - 1);
-          onHeaderNavRevealRef.current?.();
-          const navRoot = containerRef.current;
-          if (navRoot) {
-            navRoot.querySelectorAll(".nav-reveal-item").forEach((el) => {
-              el.classList.remove("opacity-0");
-            });
-          }
-          lockFrameToLast();
-          return;
-        }
-
-        gsap.killTweensOf(introStateRef.current);
-
-        introActiveRef.current = true;
-        const lastIdx = fc - 1;
-        gsap.set(introStateRef.current, { frame: 0 });
-        drawFrame();
-
-        const introOnUpdate = wrap(() => {
-          drawFrame();
-        });
-
-        gsap.to(introStateRef.current, {
-          frame: lastIdx,
-          duration: CONSTRUCTION_DURATION_SEC,
-          ease: "none",
-          onUpdate: introOnUpdate,
-          onComplete: wrap(() => {
-            introActiveRef.current = false;
-            introStateRef.current = { frame: lastIdx };
-            constructionCompleteRef.current = true;
-            scrollStateRef.current.frame = lastIdx;
-
-            const navRoot = containerRef.current;
-            const navItems = navRoot?.querySelectorAll(".nav-reveal-item");
-
-            onHeaderNavRevealRef.current?.();
-
-            if (navItems?.length) {
-              navItems.forEach((el) => {
-                el.classList.remove("opacity-0");
-              });
-
-              gsap.fromTo(
-                navItems,
-                { y: 20, opacity: 0 },
-                {
-                  y: 0,
-                  opacity: 1,
-                  duration: 0.8,
-                  ease: "power3.out",
-                  stagger: 0.15,
-                  clearProps: "all",
-                },
-              );
-            }
-
-            lockFrameToLast();
-          }),
-        });
-      });
-
-      runIntroConstructionRef.current = runIntroConstruction;
-
-      const boot = async () => {
-        try {
-          console.log("⏳ [Hero] Iniciando fetch do manifest.json...");
-          const res = await fetch("/images/video/manifest.json");
-
-          if (!res.ok) {
-            console.warn("⚠️ [Hero] Manifest.json retornou erro:", res.status);
-            notifyHeroReady();
-            return;
-          }
-
-          const manifest = (await res.json()) as HeroManifest;
-          const manifestCount = manifest.frameCount;
-
-          if (cancelled) return;
-          if (!manifestCount) {
-            console.warn("⚠️ [Hero] Manifest sem frameCount.");
-            notifyHeroReady();
-            return;
-          }
-
-          console.log("✅ [Hero] Manifest carregado, avisando a Home para liberar o vídeo...");
-          // Libera a intro imediatamente antes do preload longo dos frames
-          notifyHeroReady();
-
-          let loadedImages: HTMLImageElement[];
-          try {
-            loadedImages = await preloadFramesResilient(manifestCount);
-          } catch (err) {
-            console.error("❌ [Hero] Erro crítico ao carregar frames:", err);
-            return;
-          }
-
-          wrap(() => {
-            if (cancelled) return;
-            heroImagesRef.current = loadedImages;
-            heroFrameCountRef.current = manifestCount;
-
-            if (prefersReducedRef.current) {
-              constructionCompleteRef.current = true;
-              lockFrameToLast();
-            }
-
-            drawFrame();
-
-            if (pendingIntroConstructionRef.current) {
-              runIntroConstruction();
-            }
-          })();
-
-        } catch (err) {
-          console.error("❌ [Hero] Falha geral no boot:", err);
-          notifyHeroReady();
-        }
-      };
-
-      void boot();
-
-      const ro = new ResizeObserver(
-        wrap((entries: ResizeObserverEntry[]) => {
-          if (!entries.length) return;
-          const { width, height } = entries[0].contentRect;
-
-          const wDiff = Math.abs(dimensionsRef.current.w - width);
-          const hDiff = Math.abs(dimensionsRef.current.h - height);
-
-          if (wDiff < 2 && hDiff < 60) return;
-
-          dimensionsRef.current = { w: width, h: height };
-
-          requestAnimationFrame(() => {
-            drawFrame();
-          });
-        }),
-      );
-      ro.observe(container);
-
-      return () => {
-        cancelled = true;
-        ro.disconnect();
-        runIntroConstructionRef.current = null;
-      };
-    },
-    { scope: containerRef, dependencies: [onReady] },
-  );
-
-  useGSAP(
-    () => {
-      if (introLiftSignal <= 0) return;
-      if (introLiftSignal === lastDispatchedLiftRef.current) return;
-
-      lastDispatchedLiftRef.current = introLiftSignal;
-
-      pendingIntroConstructionRef.current = true;
-      runIntroConstructionRef.current?.();
-    },
-    { dependencies: [introLiftSignal] },
-  );
+    const video = videoRef.current;
+    if (!video) return;
+    void video.play().catch(console.warn);
+  }, [introLiftSignal, skipIntro]);
 
   return (
     <main className="relative w-full min-w-0 overflow-x-clip bg-white text-zinc-900">
-      <section
-        ref={sectionRef}
-        className="relative w-full min-w-0 shrink-0 overflow-x-clip bg-white"
-      >
+      <section className="relative w-full min-w-0 shrink-0 overflow-x-clip bg-white">
         <div
           ref={containerRef}
           className="sticky top-0 z-20 h-[50dvh] md:h-[70dvh] lg:h-dvh min-h-0 w-full min-w-0 p-0 m-0 overflow-hidden bg-white"
         >
           <NavigateBar />
-          <img
-            src={frameUrl(0)}
-            alt=""
-            width={1280}
-            height={720}
-            fetchPriority="high"
-            decoding="async"
-            className="pointer-events-none absolute inset-0 z-0 h-full w-full max-w-none object-cover opacity-0"
-            aria-hidden
-          />
 
+          {/* Fundo branco para cobrir o flash antes do vídeo iniciar */}
           <div
             className="pointer-events-none absolute inset-0 z-0 bg-white"
             aria-hidden
           />
 
-          <canvas
-            ref={canvasRef}
-            className="absolute inset-0 z-10 block h-full w-full min-w-0 max-w-none"
-            aria-hidden
-          />
+          {skipIntro ? (
+            /* Quando volta via botão home: exibe o frame final sem reproduzir o vídeo */
+            <img
+              src={HERO_FINAL_FRAME}
+              alt=""
+              fetchPriority="high"
+              decoding="async"
+              className="pointer-events-none absolute inset-0 z-10 h-full w-full max-w-none object-cover"
+              aria-hidden
+            />
+          ) : (
+            /* Fluxo normal: vídeo HLS pré-carregado, play ao final da abertura */
+            <video
+              ref={videoRef}
+              className={`pointer-events-none absolute inset-0 z-10 h-full w-full max-w-none object-cover transition-opacity duration-500 ${
+                videoPlaying ? "opacity-100" : "opacity-0"
+              }`}
+              muted
+              playsInline
+              aria-hidden
+              onPlay={() => setVideoPlaying(true)}
+              onEnded={revealNav}
+            />
+          )}
         </div>
       </section>
     </main>

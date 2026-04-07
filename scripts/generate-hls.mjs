@@ -23,6 +23,11 @@ const STREAMS = [
     outDir: path.join(ROOT, "public", "streams", "home-mobile"),
     hlsTime: 2,
   },
+  {
+    input: path.join(ROOT, "video", "Crystal_shards_assemble_202604030618.mp4"),
+    outDir: path.join(ROOT, "public", "streams", "hero-desktop"),
+    hlsTime: 1,
+  },
 ];
 
 function ensureFfmpeg() {
