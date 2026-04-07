@@ -148,7 +148,7 @@ function IntroductionVideo({
     video.defaultMuted = true;
     video.muted = true;
     video.playsInline = true;
-    video.preload = "metadata";
+    video.preload = "auto";
 
     let interactionPlayBound = false;
     const playOnInteraction = () => {

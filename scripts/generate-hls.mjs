@@ -11,14 +11,17 @@ const STREAMS = [
   {
     input: path.join(ROOT, "video", "entrance-mobile.mp4"),
     outDir: path.join(ROOT, "public", "streams", "intro-mobile"),
+    hlsTime: 2,
   },
   {
     input: path.join(ROOT, "video", "video-de-entrada.mp4"),
     outDir: path.join(ROOT, "public", "streams", "intro-desktop"),
+    hlsTime: 1,
   },
   {
     input: path.join(ROOT, "video", "video-home-page-mobile.mp4"),
     outDir: path.join(ROOT, "public", "streams", "home-mobile"),
+    hlsTime: 2,
   },
 ];
 
@@ -31,7 +34,7 @@ function ensureFfmpeg() {
   }
 }
 
-function runFfmpeg(input, outDir) {
+function runFfmpeg(input, outDir, hlsTime) {
   mkdirSync(outDir, { recursive: true });
   const playlist = path.join(outDir, "index.m3u8");
   const segments = path.join(outDir, "seg_%03d.ts");
@@ -59,7 +62,7 @@ function runFfmpeg(input, outDir) {
     "-b:a",
     "128k",
     "-hls_time",
-    "4",
+    String(hlsTime ?? 4),
     "-hls_playlist_type",
     "vod",
     "-hls_segment_filename",
@@ -76,7 +79,7 @@ function runFfmpeg(input, outDir) {
 function main() {
   ensureFfmpeg();
   for (const item of STREAMS) {
-    runFfmpeg(item.input, item.outDir);
+    runFfmpeg(item.input, item.outDir, item.hlsTime);
   }
   console.log("OK: HLS gerado em public/streams");
 }
