@@ -45,6 +45,14 @@
   }
 }
 
+.qs-page--mobile .qs-fan-perspective-shell {
+  perspective: none;
+}
+
+.qs-page--mobile .qs-fan-tilt-layer {
+  transform: none;
+}
+
 .qs-fan-card-base {
   position: absolute;
   inset: 0;

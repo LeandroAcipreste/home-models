@@ -127,13 +127,20 @@ export default function HomePage() {
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
-  const skipIntro = Boolean((location.state as HomeLocationState | null)?.skipIntro);
+  // Trava o valor na entrada da rota para não perder o skip ao limpar o state com replace.
+  const [skipIntroOnEntry] = useState(
+    () => Boolean((location.state as HomeLocationState | null)?.skipIntro),
+  );
 
   useEffect(() => {
-    if (!skipIntro) return;
+    if (!skipIntroOnEntry) return;
     // Consome o estado apenas uma vez para a intro voltar em carregamentos normais.
     navigate("/", { replace: true });
-  }, [skipIntro, navigate]);
+  }, [skipIntroOnEntry, navigate]);
 
-  return isMobile ? <MobileHomeWrapper skipIntro={skipIntro} /> : <DesktopHomePage skipIntro={skipIntro} />;
+  return isMobile ? (
+    <MobileHomeWrapper skipIntro={skipIntroOnEntry} />
+  ) : (
+    <DesktopHomePage skipIntro={skipIntroOnEntry} />
+  );
 }

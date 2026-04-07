@@ -1,11 +1,11 @@
 .route-transition-enter {
-  animation: route-slide-in 520ms cubic-bezier(0.22, 1, 0.36, 1);
+  animation: route-slide-in 1300ms cubic-bezier(0.22, 1, 0.36, 1);
   will-change: transform, opacity;
 }
 
 @keyframes route-slide-in {
   from {
-    transform: translate3d(56px, 0, 0);
+    transform: translate3d(120px, 0, 0);
     opacity: 0.01;
   }
 

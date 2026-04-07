@@ -6,20 +6,13 @@
   z-index: 55;
   padding-bottom: env(safe-area-inset-bottom, 0px);
   pointer-events: none;
-  opacity: 0;
-  transform: translateY(30px);
-  transition:
-    opacity 1.5s cubic-bezier(0.33, 1, 0.68, 1) 0.9s,
-    transform 1.5s cubic-bezier(0.33, 1, 0.68, 1) 0.9s;
 }
 
 .bottom-nav.bottom-nav--revealed {
-  opacity: 1;
-  transform: translateY(0);
+  pointer-events: auto;
 }
 
 .bottom-nav__inner {
-  pointer-events: none;
   margin: 0 auto;
   max-width: 120rem;
   padding: 0.55rem 0.5rem 0.75rem;
@@ -29,6 +22,7 @@
   justify-content: center;
   gap: 0.35rem 0.5rem;
   background: transparent;
+  pointer-events: auto;
 }
 
 @media (min-width: 640px) {
@@ -45,19 +39,10 @@
   }
 }
 
-.bottom-nav-item {
-  opacity: 1;
-  transform: none;
-  pointer-events: none;
+.bottom-nav-reveal-item {
+  display: inline-block;
+  will-change: transform, opacity;
+  opacity: 0;
+  transform: translateY(32px);
 }
 
-.bottom-nav--revealed .bottom-nav-item {
-  pointer-events: auto;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .bottom-nav {
-    transition: none;
-    transition-delay: 0s;
-  }
-}
