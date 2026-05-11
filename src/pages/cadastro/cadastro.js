@@ -1,4 +1,5 @@
 import { rainbowBorder } from '../../components/rainbow-border/rainbow-border.js';
+import { button } from '../../components/button/button.js';
 
 const logoSrc = '/src/components/navigate-bar/logo-mode-models.jpg';
 
@@ -27,10 +28,18 @@ async function fetchCep(cep) {
 const field = (label, name, attrs = '') =>
   `<label class="cad-field"><span>${label}</span><input name="${name}" ${attrs} /></label>`;
 
-const submitBtn = rainbowBorder({ className: 'rb-pad-cad', children: 'Enviar' });
+const submitBtn = button({ 
+  children: 'Enviar', 
+  className: 'rb-pad-submit', 
+  showIcon: true 
+});
 
 export function cadastroPageHTML() {
-  const uploadBtn = rainbowBorder({ className: 'rb-pad-upload', children: 'Selecionar foto' });
+  const uploadBtn = button({ 
+    children: 'Selecionar Foto', 
+    className: 'rb-pad-upload',
+    showIcon: false 
+  });
   return `
     <main class="cadastro-page" style="--cad-bg-image:url(${logoSrc});--cad-brand-font:'Montserrat','Avenir Next','Nunito Sans','Segoe UI','Helvetica Neue',Arial,sans-serif">
       <section class="cadastro-shell" style="margin:0 auto;width:100%;max-width:64rem;padding:0 1rem">
@@ -93,7 +102,7 @@ export function cadastroPageHTML() {
               ${field('Confirmar senha','confirmarSenha','type="password" required autocomplete="new-password"')}
             </div>
             <div class="cad-submit">
-              <button type="submit" class="cad-submit-btn-wrap">${submitBtn}</button>
+              ${submitBtn}
             </div>
             <p class="cad-success js-cad-success" hidden></p>
           </form>

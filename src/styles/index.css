@@ -5,6 +5,8 @@
 @import '../components/rainbow-border/rainbow-border.css';
 @import '../components/rainbow-nav-link/rainbow-nav-link.css';
 @import '../components/button/button.css';
+@import '../components/bottom-nav/bottom-nav.css';
+@import '../components/login-modal/login-modal.css';
 
 /* Layouts */
 @import '../layouts/root-layout.css';
@@ -13,6 +15,7 @@
 @import '../pages/quemSomos/quem-somos.css';
 @import '../pages/stars/stars.css';
 @import '../pages/femaleModels/female-models.css';
+@import '../pages/maleModels/male-models.css';
 @import '../pages/cadastro/cadastro-page.css';
 
 /* ================================================================

@@ -1,0 +1,69 @@
+@keyframes rainbow-smoke {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ─── Containers de Vídeo (Fundo Rainbow Smoke) ─── */
+.hero-sticky-container,
+.hero-bg-fill,
+.intro-overlay {
+  position: relative;
+  width: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  background: linear-gradient(
+    -45deg, 
+    rgba(255, 245, 245, 1) 0%, 
+    rgba(255, 250, 242, 1) 25%, 
+    rgba(242, 255, 249, 1) 50%, 
+    rgba(242, 249, 255, 1) 75%, 
+    rgba(249, 242, 255, 1) 100%
+  );
+  background-size: 400% 400%;
+  animation: rainbow-smoke 15s ease infinite;
+}
+
+.hero-sticky-container::before,
+.intro-overlay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.035;
+  pointer-events: none;
+}
+
+/* ─── Vídeos Unificados e Responsivos ─── */
+.hero-video, 
+.intro-video-el {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  width: 100vw;
+  height: 100dvh;
+  min-width: 100%;
+  min-height: 100%;
+  object-fit: cover; /* PADRÃO DESKTOP: Ocupa toda a tela */
+  object-position: center center;
+  background-color: transparent;
+  display: block;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.hero-video.is-playing,
+.intro-video-el.is-ready {
+  opacity: 1;
+}
+
+/* ─── Ajuste Específico para Mobile (Sem Zoom) ─── */
+@media (max-width: 767px) {
+  .hero-video, 
+  .intro-video-el {
+    object-fit: contain; /* MOBILE: Aparece inteiro, sem cortar laterais */
+  }
+}
