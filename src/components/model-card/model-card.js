@@ -12,7 +12,6 @@ export function modelCardHTML(model) {
                class="model-card__img" 
                loading="lazy" />
           <div class="model-card__overlay">
-            <span class="model-card__category">${model.category}</span>
           </div>
         </div>
         <div class="model-card__info">
@@ -81,13 +80,7 @@ export function modelCardStyles() {
       opacity: 1;
     }
 
-    .model-card__category {
-      color: #fff;
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      font-weight: 600;
-    }
+
 
     .model-card__info {
       padding: 1.25rem;

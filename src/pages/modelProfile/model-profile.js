@@ -107,14 +107,7 @@ export function modelProfileHTML(state = {}) {
         color: #1a1a1a;
       }
 
-      .profile-cat {
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        letter-spacing: 0.2em;
-        color: #888;
-        margin-top: 1rem;
-        display: block;
-      }
+
 
       /* Stats Grid */
       .profile-stats-grid {
@@ -239,7 +232,6 @@ export function modelProfileHTML(state = {}) {
           </div>
           
           <h1 class="profile-name">${model.name}</h1>
-          <span class="profile-cat">${model.category}</span>
           
           <div class="profile-actions-area" style="margin-top: 2rem;">
             ${button({ 
