@@ -1,26 +1,24 @@
 @import './layouts.css';
 @import './components.css';
 
-@import '../components/rainbow-border/RainbowBorder.css';
-@import '../components/rainbow-nav-link/RainbowNavLink.css';
+/* Components */
+@import '../components/rainbow-border/rainbow-border.css';
+@import '../components/rainbow-nav-link/rainbow-nav-link.css';
 @import '../components/button/button.css';
-@import '../components/bottom-nav/BottomNavBar.css';
-@import '../components/login-modal/LoginModal.css';
 
-@import '../layouts/RootLayout.css';
+/* Layouts */
+@import '../layouts/root-layout.css';
 
-@import '../pages/home/MobileHomePage.css';
-@import '../pages/quemSomos/QuemSomos.css';
+/* Pages */
+@import '../pages/quemSomos/quem-somos.css';
 @import '../pages/stars/stars.css';
-@import '../pages/femaleModels/FemaleModels.css';
-@import '../pages/cadastro/CadastroPage.css';
+@import '../pages/femaleModels/female-models.css';
+@import '../pages/cadastro/cadastro-page.css';
 
 /* ================================================================
-   GLOBAL STYLES — substitui @import "tailwindcss"
-   Inclui reset, tipografia, variáveis e utilitários semânticos
+   GLOBAL STYLES
    ================================================================ */
 
-/* --- Reset mínimo --- */
 *, *::before, *::after { box-sizing: border-box; }
 * { margin: 0; padding: 0; }
 
