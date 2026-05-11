@@ -177,9 +177,9 @@ export function modelProfileHTML(state = {}) {
           <div class="profile-nav-top">
             ${button({ 
               children: 'Voltar para modelos', 
-              to: '/', 
+              href: '#', 
               icon: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>',
-              className: 'btn-back-profile' 
+              className: 'btn-back-profile js-btn-back' 
             })}
           </div>
           
@@ -248,7 +248,15 @@ export function initModelProfile(container, state = {}) {
   window.scrollTo(0, 0);
   const model = getModelById(params.id);
   const btnSelect = container.querySelector('.js-btn-select-model');
+  const btnBack = container.querySelector('.js-btn-back');
   const successMsg = container.querySelector('.js-success-msg');
+
+  if (btnBack) {
+    btnBack.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.history.back();
+    });
+  }
 
   if (btnSelect && successMsg) {
     btnSelect.addEventListener('click', (e) => {
