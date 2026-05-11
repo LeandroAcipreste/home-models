@@ -27,11 +27,23 @@ export function modelProfileHTML(state = {}) {
     </div>
   `).join('');
 
-  const galleryHTML = model.gallery.map(img => `
+  const renderGallery = (items) => (items || []).map(img => `
     <div class="profile-gallery-item">
       <img src="${img}" alt="" loading="lazy" class="profile-gallery-img" />
     </div>
   `).join('');
+
+  const worksHTML = renderGallery(model.works);
+  const polaroidsHTML = renderGallery(model.polaroids);
+  
+  const videoHTML = model.video ? `
+    <div class="profile-video-container">
+      <video controls class="profile-video-player" poster="${model.image}">
+        <source src="${model.video}" type="video/mp4">
+        Seu navegador não suporta vídeos.
+      </video>
+    </div>
+  ` : '<p class="profile-no-data">Vídeo não disponível.</p>';
 
   return `
     <style>
@@ -165,6 +177,49 @@ export function modelProfileHTML(state = {}) {
         align-items: center;
         margin-bottom: 2rem;
       }
+
+      .profile-section {
+        margin-bottom: 5rem;
+      }
+
+      .profile-section-title {
+        font-family: var(--fm-font-serif, serif);
+        font-size: 1.5rem;
+        color: #1a1a1a;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+
+      .profile-section-title::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: #eee;
+      }
+
+      .profile-video-container {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        background: #000;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .profile-video-player {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .profile-no-data {
+        color: #888;
+        font-style: italic;
+        font-size: 0.9rem;
+      }
     </style>
 
     <main class="profile-page">
@@ -208,9 +263,26 @@ export function modelProfileHTML(state = {}) {
           </div>
         </section>
 
-        <section class="profile-gallery">
-          ${galleryHTML}
-        </section>
+        <div class="profile-portfolio-sections">
+          <section class="profile-section">
+            <h2 class="profile-section-title">Trabalhos</h2>
+            <div class="profile-gallery">
+              ${worksHTML || '<p class="profile-no-data">Nenhum trabalho registrado.</p>'}
+            </div>
+          </section>
+
+          <section class="profile-section">
+            <h2 class="profile-section-title">Polaroids</h2>
+            <div class="profile-gallery">
+              ${polaroidsHTML || '<p class="profile-no-data">Nenhuma polaroid registrada.</p>'}
+            </div>
+          </section>
+
+          <section class="profile-section">
+            <h2 class="profile-section-title">Vídeo Apresentação</h2>
+            ${videoHTML}
+          </section>
+        </div>
       </div>
     </main>
     <style>

@@ -26,7 +26,16 @@ export const MODELS_REGISTRY = [
       '/public/images/models/img-efeito-backgroung/IMG_9604.PNG',
       '/public/images/models/img-efeito-backgroung/imgi_11_FIO00370.PNG',
       '/public/images/models/img-efeito-backgroung/13.jpg'
-    ]
+    ],
+    works: [
+      '/public/images/models/img-efeito-backgroung/charth_ss26_lb_041.JPG',
+      '/public/images/models/img-efeito-backgroung/IMG_9604.PNG'
+    ],
+    polaroids: [
+      '/public/images/models/img-efeito-backgroung/imgi_11_FIO00370.PNG',
+      '/public/images/models/img-efeito-backgroung/13.jpg'
+    ],
+    video: 'https://www.w3schools.com/html/mov_bbb.mp4'
   },
   {
     id: 'alexandre-souza',
@@ -48,7 +57,14 @@ export const MODELS_REGISTRY = [
     gallery: [
       '/public/images/models/img-efeito-backgroung/IMG_6458.JPG',
       '/public/images/models/img-efeito-backgroung/IMG_7644.JPG'
-    ]
+    ],
+    works: [
+      '/public/images/models/img-efeito-backgroung/IMG_6458.JPG'
+    ],
+    polaroids: [
+      '/public/images/models/img-efeito-backgroung/IMG_7644.JPG'
+    ],
+    video: null
   }
 ];
 
