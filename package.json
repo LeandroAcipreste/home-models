@@ -1,0 +1,8 @@
+{
+  "name": "home-models",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "echo 'Pure Static Project - No Build Needed'"
+  }
+}

@@ -1,5 +1,7 @@
 {
   "version": 2,
+  "buildCommand": "echo 'Deploying static files...'",
+  "outputDirectory": ".",
   "cleanUrls": true,
   "trailingSlash": false,
   "headers": [
