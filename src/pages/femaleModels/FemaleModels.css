@@ -3,63 +3,16 @@
   --fm-font-serif: "Instrument Serif", Georgia, "Times New Roman", serif;
 }
 
-/* --- Leque --- */
-.fm-fan-perspective-shell {
-  perspective: 2000px;
-  perspective-origin: 50% 42%;
-}
-
-.fm-fan-tilt-layer {
-  transform-style: preserve-3d;
-  transform: rotateX(1deg);
-}
-
-.fm-fan-layout {
+/* --- Layout --- */
+.fm-content-layer {
   position: relative;
-  width: 601px;
-  max-width: min(100%, 601px);
-  aspect-ratio: 601 / 416;
-  height: auto;
-  transform-style: preserve-3d;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-@media (max-width: 991px) {
-  .fm-fan-perspective-shell {
-    perspective: 1300px;
-  }
-
-  .fm-fan-layout {
-    width: 400px;
-    max-width: min(100%, 400px);
-    aspect-ratio: 400 / 277;
-  }
-}
-
-@media (max-width: 767px) {
-  .fm-fan-layout {
-    width: 300px;
-    max-width: min(100%, 300px);
-    aspect-ratio: 300 / 208;
-  }
-}
-
-.fm-fan-card-base {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  transform-style: preserve-3d;
-  backface-visibility: hidden;
-  box-shadow: 0 16px 40px rgb(0 0 0 / 0.12), 0 4px 12px rgb(0 0 0 / 0.06);
-}
-
-.fm-fan-card-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center top;
-  display: block;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  padding: 2rem;
 }
 
 .fm-hero-title {

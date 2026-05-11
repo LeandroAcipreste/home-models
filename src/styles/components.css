@@ -1,0 +1,10 @@
+/* Estilos de componentes comuns — sem Tailwind */
+
+/* CadastroPage submit button wrapper */
+.cad-submit-btn-wrap {
+  display: inline-flex;
+  cursor: pointer;
+  border: 0;
+  background: transparent;
+  padding: 0;
+}
